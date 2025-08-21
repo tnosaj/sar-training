@@ -20,3 +20,4 @@ export async function apiFetch(path: string, opts: RequestInit = {}) {
     throw new Error(err);
   }
   return data;
+}
