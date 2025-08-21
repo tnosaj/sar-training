@@ -371,8 +371,8 @@ function DogsTab() {
 function SessionsTab() {
   const sessions = useList<any>(() => apiFetch('/sessions'))
   const dogs = useList<any>(() => apiFetch('/dogs'))
-  const behaviors = useList<any>(() => apiFetch('/behaviors'))
-  const exercises = useList<any>(() => apiFetch('/exercises'))
+  const behaviorsList = useList<any>(() => apiFetch('/behaviors'))
+  const exercisesList = useList<any>(() => apiFetch('/exercises'))
 
   const [location, setLocation] = useState('')
   const [notes, setNotes] = useState('')
@@ -392,7 +392,7 @@ function SessionsTab() {
       <Section title="All Sessions" actions={<Button variant="secondary" onClick={sessions.reload}>Refresh</Button>}>
         <CardList items={sessions.items} empty="No sessions yet.">
           {(s:any) => (
-            <SessionCard s={s} dogs={dogs.items} behaviors={behaviors.items} exercises={exercises.items} />
+            <SessionCard s={s} dogs={dogs.items} behaviors={behaviorsList.items} exercises={exercisesList.items} />
           )}
         </CardList>
       </Section>
@@ -480,15 +480,15 @@ function SessionCard({ s, dogs, behaviors, exercises }:{ s:any, dogs:any[], beha
               </Select>
               <Select label="Exercise" value={exerciseId} onChange={e => setExerciseId(e.target.value)}>
                 <option value="">-- choose exercise --</option>
-                {exercises.items.map((x:any) => <option key={x.id} value={x.id}>{x.name}</option>)}
+                {exercises.map((x:any) => <option key={x.id} value={x.id}>{x.name}</option>)}
               </Select>
               <Select label="Planned Behavior" value={plannedBehaviorId} onChange={e => setPlannedBehaviorId(e.target.value)}>
                 <option value="">-- choose behavior --</option>
-                {behaviors.items.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                {behaviors.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
               </Select>
               <Select label="Exhibited Behavior (optional)" value={exhibitedBehaviorId} onChange={e => setExhibitedBehaviorId(e.target.value)}>
                 <option value="">(none / free text)</option>
-                {behaviors.items.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                {behaviors.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
               </Select>
               <Select label="Outcome" value={outcome} onChange={e => setOutcome(e.target.value)}>
                 <option value="success">success</option>
@@ -530,9 +530,9 @@ function SessionCard({ s, dogs, behaviors, exercises }:{ s:any, dogs:any[], beha
                 <tr key={r.id || idx} className="odd:bg-white even:bg-gray-50">
                   <td className="p-2 border-b">{r.round_number}</td>
                   <td className="p-2 border-b">{(sessionDogs.items.find((d:any) => d.id === r.dog_id)?.name) || r.dog_id}</td>
-                  <td className="p-2 border-b">{(exercises.items.find((x:any) => x.id === r.exercise_id)?.name) || r.exercise_id}</td>
-                  <td className="p-2 border-b">{(behaviors.items.find((b:any) => b.id === r.planned_behavior_id)?.name) || r.planned_behavior_id}</td>
-                  <td className="p-2 border-b">{r.exhibited_behavior_id ? (behaviors.items.find((b:any) => b.id === r.exhibited_behavior_id)?.name || r.exhibited_behavior_id) : (r.exhibited_free_text || '—')}</td>
+                  <td className="p-2 border-b">{(exercises.find((x:any) => x.id === r.exercise_id)?.name) || r.exercise_id}</td>
+                  <td className="p-2 border-b">{(behaviors.find((b:any) => b.id === r.planned_behavior_id)?.name) || r.planned_behavior_id}</td>
+                  <td className="p-2 border-b">{r.exhibited_behavior_id ? (behaviors.find((b:any) => b.id === r.exhibited_behavior_id)?.name || r.exhibited_behavior_id) : (r.exhibited_free_text || '—')}</td>
                   <td className="p-2 border-b">{r.outcome}</td>
                   <td className="p-2 border-b">{r.score ?? ''}</td>
                   <td className="p-2 border-b">{r.notes ?? ''}</td>
