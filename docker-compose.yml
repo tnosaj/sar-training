@@ -1,0 +1,47 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8080
+      - DB_PATH=/data/dogtracker.db
+    volumes:
+      - dbdata:/data
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  # Optional: Node server to preview the SPA (good for quick checks)
+  frontend:
+    build:
+      context: ./webui
+      dockerfile: Dockerfile
+    environment:
+      # Only used if you point the app at the backend directly (Settings tab),
+      # or if you run a dev server with proxy. The preview server does NOT proxy /api.
+      - VITE_API_TARGET=http://backend:8080
+    ports:
+      - "4173:4173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Production web entrypoint: Nginx serving the built SPA and proxying /api -> backend
+  web:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  dbdata:
