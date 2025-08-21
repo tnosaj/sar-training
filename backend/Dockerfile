@@ -4,9 +4,6 @@
 FROM golang:1.24-bookworm AS builder
 WORKDIR /app
 
-# Enable CGO for github.com/mattn/go-sqlite3
-ENV CGO_ENABLED=1
-
 # Build deps for CGO
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential && rm -rf /var/lib/apt/lists/*
 
@@ -16,8 +13,8 @@ RUN go mod download
 
 # Copy the rest and build
 COPY . .
-RUN go build -o server .
-
+# Enable CGO for github.com/mattn/go-sqlite3
+RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflags "-static"' -o server .
 # --- Runtime stage ---
 FROM scratch AS runner
 
@@ -34,5 +31,5 @@ ENV PORT=8080 \
 VOLUME ["/data"]
 
 EXPOSE 8080
-USER appuser
+#USER appuser
 ENTRYPOINT ["/app/server"]
