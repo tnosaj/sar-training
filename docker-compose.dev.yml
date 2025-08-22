@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8080
+      - DB_PATH=/data/dogtracker.db
+    volumes:
+      - dbdata:/data
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+  frontend-dev:
+    image: node:20-alpine
+    working_dir: /app
+    environment:
+      - VITE_API_TARGET=http://backend:8080   # Vite proxy target inside the compose network
+      - CHOKIDAR_USEPOLLING=true              # helps file watching on some Docker hosts
+      - CHOKIDAR_INTERVAL=100
+    volumes:
+      - ./webui:/app                          # your source
+      - /app/node_modules                     # keep node_modules inside container (don’t overwrite with bind mount)
+    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+volumes:
+  dbdata:
