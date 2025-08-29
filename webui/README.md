@@ -2,6 +2,21 @@
 
 This is a modularized React + Vite + Tailwind app that consumes the Go backend.
 
+## Localization (i18n)
+
+This app uses **i18next** + **react-i18next** with browser language detection and a Settings language selector.
+
+- Languages provided: **English (en)** and **German (de)**.
+- Auto-detects via URL query `?lang=de`, `localStorage`, or browser.
+- To add more strings/languages, create/edit files under:
+  - `src/i18n/locales/<lng>/common.json`
+- Use in components:
+  ```tsx
+  import { useTranslation } from 'react-i18next'
+  const { t } = useTranslation()
+  <h2>{t('nav.sessions')}</h2>
+  ```
+
 ## Install & run
 ```bash
 npm i

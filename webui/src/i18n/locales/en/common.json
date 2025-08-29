@@ -1,0 +1,22 @@
+{
+  "app": {
+    "title": "Dog Training Tracker"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "skills": "Skills",
+    "behaviors": "Behaviors",
+    "exercises": "Exercises",
+    "dogs": "Dogs",
+    "sessions": "Sessions",
+    "settings": "Settings",
+    "language": "Language"
+  },
+  "settings": {
+    "title": "Settings",
+    "api_base": "API Base",
+    "save": "Save",
+    "language": "Language",
+    "blurb": "Set the API base URL. In dev the default /api goes through the Vite proxy to http://localhost:8080. For production you can point this at a full URL or configure your reverse proxy to keep the /api prefix."
+  }
+}

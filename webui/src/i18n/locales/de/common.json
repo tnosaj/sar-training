@@ -1,0 +1,22 @@
+{
+  "app": {
+    "title": "Hundetrainings-Tracker"
+  },
+  "nav": {
+    "dashboard": "Übersicht",
+    "skills": "Fähigkeiten",
+    "behaviors": "Verhalten",
+    "exercises": "Übungen",
+    "dogs": "Hunde",
+    "sessions": "Sitzungen",
+    "settings": "Einstellungen",
+    "language": "Sprache"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "api_base": "API-Basis",
+    "save": "Speichern",
+    "language": "Sprache",
+    "blurb": "Lege die Basis-URL der API fest. In der Entwicklung leitet /api über den Vite-Proxy zu http://localhost:8080 weiter. In der Produktion kannst du eine vollständige URL angeben oder den /api-Pfad über deinen Reverse-Proxy beibehalten."
+  }
+}

@@ -14,7 +14,7 @@ RUN go mod download
 # Copy the rest and build
 COPY . .
 # Enable CGO for github.com/mattn/go-sqlite3
-RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflags "-static"' -o server .
+RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflags "-static"' -o server ./cmd/server/
 # --- Runtime stage ---
 FROM scratch AS runner
 
