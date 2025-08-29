@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { getInitialApiBase, LS_KEY } from './lib/api'
+import { getInitialApiBase, startNetworkWatcher, LS_KEY } from './lib/api'
 import Dashboard from './features/dashboard/Dashboard'
 import SkillsPage from './features/skills/SkillsPage'
 import BehaviorsPage from './features/behaviors/BehaviorsPage'
@@ -9,6 +9,8 @@ import SessionsPage from './features/sessions/SessionsPage'
 import SettingsPage from './features/settings/SettingsPage'
 import { cx } from './lib/cx'
 import { Select } from './components/ui/Select'
+import OfflineBanner from './components/OfflineBanner'
+
 import { useTranslation } from 'react-i18next'
 
 const TABS = [
@@ -23,7 +25,10 @@ const TABS = [
 
 export default function App() {
   const [apiBase, setApiBase] = useState(getInitialApiBase())
-  useEffect(() => { localStorage.setItem(LS_KEY, apiBase) }, [apiBase])
+  useEffect(() => {
+    localStorage.setItem(LS_KEY, apiBase)
+    startNetworkWatcher(apiBase)
+  }, [apiBase])
   const [tab, setTab] = useState<(typeof TABS)[number]['key']>('dashboard')
   const { t, i18n } = useTranslation()
    const currentLng = (i18n.resolvedLanguage || i18n.language || 'en').split('-')[0]
@@ -55,7 +60,7 @@ export default function App() {
           </div>
         </div>
       </header>
-
+      <OfflineBanner />
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {tab === 'dashboard' && <Dashboard />}
         {tab === 'skills' && <SkillsPage />}
