@@ -8,33 +8,51 @@ import DogsPage from './features/dogs/DogsPage'
 import SessionsPage from './features/sessions/SessionsPage'
 import SettingsPage from './features/settings/SettingsPage'
 import { cx } from './lib/cx'
+import Select from './components/Select'
+import { useTranslation } from 'react-i18next'
 
 const TABS = [
-  { key: 'dashboard', label: 'Dashboard' },
-  { key: 'skills', label: 'Skills' },
-  { key: 'behaviors', label: 'Behaviors' },
-  { key: 'exercises', label: 'Exercises' },
-  { key: 'dogs', label: 'Dogs' },
-  { key: 'sessions', label: 'Sessions' },
-  { key: 'settings', label: 'Settings' },
+  { key: 'dashboard', labelKey: 'nav.dashboard' },
+  { key: 'skills',    labelKey: 'nav.skills' },
+  { key: 'behaviors', labelKey: 'nav.behaviors' },
+  { key: 'exercises', labelKey: 'nav.exercises' },
+  { key: 'dogs',      labelKey: 'nav.dogs' },
+  { key: 'sessions',  labelKey: 'nav.sessions' },
+  { key: 'settings',  labelKey: 'nav.settings' },
 ] as const
 
 export default function App() {
   const [apiBase, setApiBase] = useState(getInitialApiBase())
   useEffect(() => { localStorage.setItem(LS_KEY, apiBase) }, [apiBase])
   const [tab, setTab] = useState<(typeof TABS)[number]['key']>('dashboard')
+  const { t, i18n } = useTranslation()
+   const currentLng = (i18n.resolvedLanguage || i18n.language || 'en').split('-')[0]
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">🐾 Dog Training Tracker</h1>
-          <nav className="flex gap-2 overflow-x-auto">
-            {TABS.map(t => (
-              <button key={t.key} onClick={() => setTab(t.key)}
-                className={cx('px-3 py-1.5 rounded-xl text-sm', tab === t.key ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200')}>{t.label}</button>
-            ))}
-          </nav>
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold">🐾 {t('app.title')}</h1>
+          <div className="flex items-center gap-3">
+            <nav className="flex gap-2 overflow-x-auto">
+              {TABS.map(tb => (
+                <button key={tb.key} onClick={() => setTab(tb.key)}
+                  className={cx('px-3 py-1.5 rounded-xl text-sm', tab === tb.key ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200')}>
+                  {t(tb.labelKey)}
+                </button>
+              ))}
+            </nav>
+            <div className="hidden md:block w-36">
+              <Select
+                label={t('nav.language')}
+                value={currentLng}
+                onChange={e => i18n.changeLanguage((e.target as HTMLSelectElement).value)}
+              >
+                <option value="en">English</option>
+                <option value="de">Deutsch</option>
+              </Select>
+            </div>
+          </div>
         </div>
       </header>
 
