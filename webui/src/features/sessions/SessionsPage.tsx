@@ -7,8 +7,10 @@ import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { CardList } from '../../components/ui/CardList'
 import SessionCard from './SessionCard'
+import { useTranslation } from 'react-i18next'
 
 export default function SessionsPage() {
+  const { t } = useTranslation()
   const sessions = useList<any>(() => apiFetch('/sessions'))
   const dogs = useList<any>(() => apiFetch('/dogs'))
   const behaviorsList = useList<any>(() => apiFetch('/behaviors'))
@@ -24,13 +26,13 @@ export default function SessionsPage() {
 
   return (
     <div className="space-y-6">
-      <Section title="Create Session" actions={<Button onClick={createSession}>Create Session</Button>}>
-        <Input label="Location (optional)" value={location} onChange={e => setLocation(e.target.value)} placeholder="Training field" />
-        <Textarea label="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Evening work" />
+      <Section title={t('sessions.create_title')} actions={<Button onClick={createSession}>{t('sessions.create_button')}</Button>}>
+        <Input label={t('sessions.location_optional')} value={location} onChange={e => setLocation(e.target.value)} placeholder={t('sessions.placeholder_location')} />
+        <Textarea label={t('sessions.notes_optional')} value={notes} onChange={e => setNotes(e.target.value)} placeholder={t('sessions.placeholder_notes')} />
       </Section>
 
-      <Section title="All Sessions" actions={<Button variant="secondary" onClick={sessions.reload}>Refresh</Button>}>
-        <CardList items={sessions.items} empty="No sessions yet.">
+      <Section title={t('sessions.list_title')} actions={<Button variant="secondary" onClick={sessions.reload}>{t('common.refresh')}</Button>}>
+        <CardList items={sessions.items} empty={t('sessions.empty') as string}>
           {(s:any) => (
             <SessionCard s={s} dogs={dogs.items} behaviors={behaviorsList.items} exercises={exercisesList.items} />
           )}

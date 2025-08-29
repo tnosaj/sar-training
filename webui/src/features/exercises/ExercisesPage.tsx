@@ -7,8 +7,10 @@ import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { Select } from '../../components/ui/Select'
 import { CardList } from '../../components/ui/CardList'
+import { useTranslation } from 'react-i18next'
 
 export default function ExercisesPage() {
+  const { t } = useTranslation()
   const exercises = useList<any>(() => apiFetch('/exercises'))
   const behaviors = useList<any>(() => apiFetch('/behaviors'))
   const [name, setName] = useState('')
@@ -27,31 +29,31 @@ export default function ExercisesPage() {
   const link = async () => {
     if (!linkBehavior || !linkExercise) return
     await apiFetch('/behavior-exercises', { method: 'POST', body: JSON.stringify({ behavior_id: Number(linkBehavior), exercise_id: Number(linkExercise), strength: Number(strength) }) })
-    alert('Linked!')
+    alert(t('exercises.linked'))
   }
 
   return (
     <div className="grid md:grid-cols-3 gap-6">
-      <Section title="Create Exercise" actions={<Button onClick={create}>Create</Button>}>
-        <Input label="Name" value={name} onChange={e => setName(e.target.value)} placeholder="Duration Hold" />
-        <Textarea label="Description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Hold sit for duration" />
+      <Section title={t('exercises.create_title')} actions={<Button onClick={create}>{t('common.create')}</Button>}>
+        <Input label={t('common.name')} value={name} onChange={e => setName(e.target.value)} placeholder={t('exercises.placeholder_name')} />
+        <Textarea label={t('common.description')} value={description} onChange={e => setDescription(e.target.value)} placeholder={t('exercises.placeholder_description')} />
       </Section>
 
-      <Section title="Link Exercise ⇄ Behavior" actions={<Button onClick={link}>Link</Button>}>
-        <Select label="Behavior" value={linkBehavior} onChange={e => setLinkBehavior(e.target.value)}>
-          <option value="">-- choose behavior --</option>
+      <Section title={t('exercises.link_title')} actions={<Button onClick={link}>{t('exercises.link')}</Button>}>
+        <Select label={t('behaviors.behavior')} value={linkBehavior} onChange={e => setLinkBehavior(e.target.value)}>
+          <option value="">{t('behaviors.choose_behavior')}</option>
           {behaviors.items.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
         </Select>
-        <Select label="Exercise" value={linkExercise} onChange={e => setLinkExercise(e.target.value)}>
-          <option value="">-- choose exercise --</option>
+        <Select label={t('exercises.exercise')} value={linkExercise} onChange={e => setLinkExercise(e.target.value)}>
+          <option value="">{t('exercises.choose_exercise')}</option>
           {exercises.items.map((x:any) => <option key={x.id} value={x.id}>{x.name}</option>)}
         </Select>
-        <Input label="Strength (1-5)" type="number" min={1} max={5} value={strength} onChange={e => setStrength(e.target.value)} />
+        <Input label={t('exercises.strength')} type="number" min={1} max={5} value={strength} onChange={e => setStrength(e.target.value)} />
       </Section>
 
       <div className="md:col-span-1">
-        <Section title="Exercises" actions={<Button variant="secondary" onClick={exercises.reload}>Refresh</Button>}>
-          <CardList items={exercises.items} empty="No exercises yet.">
+        <Section title={t('exercises.list_title')} actions={<Button variant="secondary" onClick={exercises.reload}>{t('common.refresh')}</Button>}>
+          <CardList items={exercises.items} empty={t('exercises.empty') as string}>
             {(x:any) => (
               <div>
                 <div className="font-semibold">{x.name}</div>

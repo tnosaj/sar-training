@@ -6,8 +6,10 @@ import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { CardList } from '../../components/ui/CardList'
+import { useTranslation } from 'react-i18next'
 
 export default function SkillsPage() {
+  const { t } = useTranslation()
   const list = useList<any>(() => apiFetch('/skills'))
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -20,13 +22,13 @@ export default function SkillsPage() {
 
   return (
     <div className="grid md:grid-cols-3 gap-6">
-      <Section title="Create Skill" actions={<Button onClick={create}>Create</Button>}>
-        <Input label="Name" value={name} onChange={e => setName(e.target.value)} placeholder="Obedience" />
-        <Textarea label="Description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Core obedience skillset" />
+      <Section title={t('skills.create_title')} actions={<Button onClick={create}>{t('common.create')}</Button>}>
+        <Input label={t('common.name')} value={name} onChange={e => setName(e.target.value)} placeholder={t('skills.placeholder_name')} />
+        <Textarea label={t('common.description')} value={description} onChange={e => setDescription(e.target.value)} placeholder={t('skills.placeholder_description')} />
       </Section>
       <div className="md:col-span-2">
-        <Section title="All Skills" actions={<Button variant="secondary" onClick={list.reload}>Refresh</Button>}>
-          <CardList items={list.items} empty="No skills yet.">
+        <Section title={t('skills.list_title')} actions={<Button variant="secondary" onClick={list.reload}>{t('common.refresh')}</Button>}>
+          <CardList items={list.items} empty={t('skills.empty') as string}>
             {(sk:any) => (
               <div>
                 <div className="font-semibold">{sk.name}</div>
