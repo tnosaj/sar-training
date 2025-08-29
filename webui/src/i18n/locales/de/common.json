@@ -2,21 +2,123 @@
   "app": {
     "title": "SAR training-Tracker"
   },
-  "nav": {
-    "dashboard": "Übersicht",
-    "skills": "Fähigkeiten",
-    "behaviors": "Verhalten",
-    "exercises": "Übungen",
-    "dogs": "Hunde",
-    "sessions": "Durchgang",
-    "settings": "Einstellungen",
-    "language": "Sprache"
+  "behaviors": {
+    "all_skills": "(alle Fähigkeiten)",
+    "behavior": "Verhalten",
+    "choose_behavior": "-- Verhalten wählen --",
+    "choose_skill": "-- Fähigkeit wählen --",
+    "create_title": "Verhalten anlegen",
+    "empty": "Noch kein Verhalten.",
+    "filter_by_skill": "Nach Fähigkeit filtern",
+    "list_title": "Verhalten",
+    "placeholder_description": "Sitz auf Signal",
+    "placeholder_name": "Sitz",
+    "skill": "Fähigkeit",
+    "skill_col": "Fähigkeit"
   },
-  "settings": {
-    "title": "Einstellungen",
-    "api_base": "API-Basis",
-    "save": "Speichern",
+  "common": {
+    "create": "Erstellen",
+    "description": "Beschreibung",
+    "name": "Name",
+    "none_yet": "Noch keine",
+    "refresh": "Aktualisieren"
+  },
+  "dashboard": {
+    "quick_stats": "Kurzstatistik",
+    "recent_sessions": "Letzte Einheiten"
+  },
+  "dogs": {
+    "birthdate_optional": "Geburtsdatum (RFC3339, optional)",
+    "born": "Geboren",
+    "callname_optional": "Rufname (optional)",
+    "create_title": "Hund anlegen",
+    "empty": "Noch keine Hunde.",
+    "list_title": "Alle Hunde",
+    "name": "Name"
+  },
+  "exercises": {
+    "choose_exercise": "-- Übung wählen --",
+    "create_title": "Übung anlegen",
+    "empty": "Noch keine Übungen.",
+    "exercise": "Übung",
+    "link": "Verknüpfen",
+    "link_title": "Übung ⇄ Verhalten verknüpfen",
+    "linked": "Verknüpft!",
+    "list_title": "Übungen",
+    "placeholder_description": "Sitz für eine Dauer halten",
+    "placeholder_name": "Dauer-Halten",
+    "strength": "Stärke (1‑5)"
+  },
+   "nav": {
+    "behaviors": "Verhalten",
+     "dashboard": "Übersicht",
+    "dogs": "Hunde",
+     "exercises": "Übungen",
     "language": "Sprache",
-    "blurb": "Lege die Basis-URL der API fest. In der Entwicklung leitet /api über den Vite-Proxy zu http://localhost:8080 weiter. In der Produktion kannst du eine vollständige URL angeben oder den /api-Pfad über deinen Reverse-Proxy beibehalten."
-  }
-}
+     "sessions": "Durchgang",
+     "settings": "Einstellungen",
+    "skills": "Fähigkeiten"
+  },
+  "session": {
+    "add": "Hinzufügen",
+    "add_dog": "Hund hinzufügen…",
+    "choose_behavior": "-- Verhalten wählen --",
+    "choose_dog": "-- Hund wählen --",
+    "choose_exercise": "-- Übung wählen --",
+    "dog": "Hund",
+    "dogs_in_session": "Hunde in der Einheit",
+    "ended_at_optional": "Ende (RFC3339, optional)",
+    "exercise": "Übung",
+    "exhibited_behavior_optional": "Gezeigtes Verhalten (optional)",
+    "exhibited_free_text_optional": "Gezeigtes Verhalten (Freitext, optional)",
+    "fail": "fehlgeschlagen",
+    "log_round": "Runde protokollieren",
+    "log_round_action": "Runde speichern",
+    "none_free_text": "(kein / Freitext)",
+    "notes_optional": "Notizen (optional)",
+    "now": "Jetzt",
+    "outcome": "Ergebnis",
+    "partial": "teilweise",
+    "planned_behavior": "Geplantes Verhalten",
+    "score_optional": "Bewertung (0‑10, optional)",
+    "session": "Einheit",
+    "started": "Beginn:",
+    "started_at_optional": "Beginn (RFC3339, optional)",
+    "success": "erfolgreich",
+    "table": {
+      "dog": "Hund",
+      "exercise": "Übung",
+      "exhibited": "Gezeigt",
+      "no_rounds": "Noch keine Runden.",
+      "notes": "Notizen",
+      "num": "#",
+      "outcome": "Ergebnis",
+      "planned": "Geplant",
+      "score": "Bewertung"
+    }
+  },
+  "sessions": {
+    "create_button": "Trainingseinheit erstellen",
+    "create_title": "Trainingseinheit anlegen",
+    "empty": "Noch keine Einheiten.",
+    "list_title": "Alle Einheiten",
+    "location_optional": "Ort (optional)",
+    "notes_optional": "Notizen (optional)",
+    "placeholder_location": "Trainingsplatz",
+    "placeholder_notes": "Abendarbeit"
+   },
+   "settings": {
+     "api_base": "API-Basis",
+    "blurb": "Lege die Basis-URL der API fest. In der Entwicklung leitet /api über den Vite-Proxy zu http://localhost:8080 weiter. In der Produktion kannst du eine vollständige URL angeben oder den /api-Pfad über deinen Reverse-Proxy beibehalten.",
+    "language": "Sprache",
+     "save": "Speichern",
+    "title": "Einstellungen"
+  },
+  "skills": {
+    "create_title": "Fähigkeit anlegen",
+    "empty": "Noch keine Fähigkeiten.",
+    "list_title": "Alle Fähigkeiten",
+    "placeholder_description": "Kern‑Gehorsamsfertigkeiten",
+    "placeholder_name": "Gehorsam"
+   }
+ }

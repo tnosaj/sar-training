@@ -2,21 +2,123 @@
   "app": {
     "title": "Dog Training Tracker"
   },
-  "nav": {
-    "dashboard": "Dashboard",
-    "skills": "Skills",
-    "behaviors": "Behaviors",
-    "exercises": "Exercises",
-    "dogs": "Dogs",
-    "sessions": "Sessions",
-    "settings": "Settings",
-    "language": "Language"
+  "behaviors": {
+    "all_skills": "(all skills)",
+    "behavior": "Behavior",
+    "choose_behavior": "-- choose behavior --",
+    "choose_skill": "-- choose a skill --",
+    "create_title": "Create Behavior",
+    "empty": "No behaviors yet.",
+    "filter_by_skill": "Filter by skill",
+    "list_title": "Behaviors",
+    "placeholder_description": "Sit on cue",
+    "placeholder_name": "Sit",
+    "skill": "Skill",
+    "skill_col": "Skill"
   },
-  "settings": {
-    "title": "Settings",
-    "api_base": "API Base",
-    "save": "Save",
+  "common": {
+    "create": "Create",
+    "description": "Description",
+    "name": "Name",
+    "none_yet": "None yet",
+    "refresh": "Refresh"
+  },
+  "dashboard": {
+    "quick_stats": "Quick Stats",
+    "recent_sessions": "Recent Sessions"
+  },
+  "dogs": {
+    "birthdate_optional": "Birthdate (RFC3339, optional)",
+    "born": "Born",
+    "callname_optional": "Callname (optional)",
+    "create_title": "Create Dog",
+    "empty": "No dogs yet.",
+    "list_title": "All Dogs",
+    "name": "Name"
+  },
+  "exercises": {
+    "choose_exercise": "-- choose exercise --",
+    "create_title": "Create Exercise",
+    "empty": "No exercises yet.",
+    "exercise": "Exercise",
+    "link": "Link",
+    "link_title": "Link Exercise ⇄ Behavior",
+    "linked": "Linked!",
+    "list_title": "Exercises",
+    "placeholder_description": "Hold sit for duration",
+    "placeholder_name": "Duration Hold",
+    "strength": "Strength (1-5)"
+  },
+   "nav": {
+    "behaviors": "Behaviors",
+     "dashboard": "Dashboard",
+    "dogs": "Dogs",
+     "exercises": "Exercises",
     "language": "Language",
-    "blurb": "Set the API base URL. In dev the default /api goes through the Vite proxy to http://localhost:8080. For production you can point this at a full URL or configure your reverse proxy to keep the /api prefix."
-  }
-}
+     "sessions": "Sessions",
+     "settings": "Settings",
+    "skills": "Skills"
+  },
+  "session": {
+    "add": "Add",
+    "add_dog": "Add dog…",
+    "choose_behavior": "-- choose behavior --",
+    "choose_dog": "-- choose dog --",
+    "choose_exercise": "-- choose exercise --",
+    "dog": "Dog",
+    "dogs_in_session": "Dogs in session",
+    "ended_at_optional": "Ended at (RFC3339, optional)",
+    "exercise": "Exercise",
+    "exhibited_behavior_optional": "Exhibited Behavior (optional)",
+    "exhibited_free_text_optional": "Exhibited Free Text (optional)",
+    "fail": "fail",
+    "log_round": "Log a Round",
+    "log_round_action": "Log Round",
+    "none_free_text": "(none / free text)",
+    "notes_optional": "Notes (optional)",
+    "now": "Now",
+    "outcome": "Outcome",
+    "partial": "partial",
+    "planned_behavior": "Planned Behavior",
+    "score_optional": "Score (0-10, optional)",
+    "session": "Session",
+    "started": "Started:",
+    "started_at_optional": "Started at (RFC3339, optional)",
+    "success": "success",
+    "table": {
+      "dog": "Dog",
+      "exercise": "Exercise",
+      "exhibited": "Exhibited",
+      "no_rounds": "No rounds yet.",
+      "notes": "Notes",
+      "num": "#",
+      "outcome": "Outcome",
+      "planned": "Planned",
+      "score": "Score"
+    }
+  },
+  "sessions": {
+    "create_button": "Create Session",
+    "create_title": "Create Session",
+    "empty": "No sessions yet.",
+    "list_title": "All Sessions",
+    "location_optional": "Location (optional)",
+    "notes_optional": "Notes (optional)",
+    "placeholder_location": "Training field",
+    "placeholder_notes": "Evening work"
+   },
+   "settings": {
+     "api_base": "API Base",
+    "blurb": "Set the API base URL. In dev the default /api goes through the Vite proxy to http://localhost:8080. For production you can point this at a full URL or configure your reverse proxy to keep the /api prefix.",
+    "language": "Language",
+     "save": "Save",
+    "title": "Settings"
+  },
+  "skills": {
+    "create_title": "Create Skill",
+    "empty": "No skills yet.",
+    "list_title": "All Skills",
+    "placeholder_description": "Core obedience skillset",
+    "placeholder_name": "Obedience"
+   }
+ }
