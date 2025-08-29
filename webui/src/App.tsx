@@ -8,7 +8,7 @@ import DogsPage from './features/dogs/DogsPage'
 import SessionsPage from './features/sessions/SessionsPage'
 import SettingsPage from './features/settings/SettingsPage'
 import { cx } from './lib/cx'
-import Select from './components/Select'
+import { Select } from './components/ui/Select'
 import { useTranslation } from 'react-i18next'
 
 const TABS = [

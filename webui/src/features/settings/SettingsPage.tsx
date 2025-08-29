@@ -3,7 +3,7 @@ import { LS_KEY } from '../../lib/api'
 import { Section } from '../../components/ui/Section'
 import { Input } from '../../components/ui/Input'
 import { Button } from '../../components/ui/Button'
-import Select from '../../components/Select'
+import { Select } from '../../components/ui/Select'
 import { useTranslation } from 'react-i18next'
 
 export default function SettingsPage({ apiBase, setApiBase }:{ apiBase: string, setApiBase: (v: string) => void }) {

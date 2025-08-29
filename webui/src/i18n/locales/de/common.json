@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Hundetrainings-Tracker"
+    "title": "SAR training-Tracker"
   },
   "nav": {
     "dashboard": "Übersicht",
@@ -8,7 +8,7 @@
     "behaviors": "Verhalten",
     "exercises": "Übungen",
     "dogs": "Hunde",
-    "sessions": "Sitzungen",
+    "sessions": "Durchgang",
     "settings": "Einstellungen",
     "language": "Sprache"
   },
