@@ -24,6 +24,7 @@ func (s *Service) Create(ctx context.Context, cmd CreateSkillCommand) (*dto.Skil
 	}
 	exists, err := s.repo.ExistsByName(ctx, cmd.Name)
 	if err != nil {
+		logx.Std.Errorf("get skill failed: %s", err)
 		return nil, err
 	}
 	if exists {
@@ -32,6 +33,7 @@ func (s *Service) Create(ctx context.Context, cmd CreateSkillCommand) (*dto.Skil
 	now := time.Now().UTC()
 	ent := &skill.Skill{Name: cmd.Name, Description: cmd.Description, CreatedAt: now, UpdatedAt: now}
 	if err := s.repo.Create(ctx, ent); err != nil {
+		logx.Std.Errorf("create skill failed: %s", err)
 		return nil, err
 	}
 	return toDTO(ent), nil
@@ -41,6 +43,7 @@ func (s *Service) List(ctx context.Context, _ ListSkillsQuery) ([]*dto.Skill, er
 	logx.Std.Trace("list skills")
 	items, err := s.repo.List(ctx)
 	if err != nil {
+		logx.Std.Errorf("list skill failed: %s", err)
 		return nil, err
 	}
 	out := make([]*dto.Skill, 0, len(items))
@@ -57,12 +60,14 @@ func (s *Service) Update(ctx context.Context, cmd UpdateSkillCommand) (*dto.Skil
 	}
 	ent, err := s.repo.Get(ctx, skill.SkillID(cmd.ID))
 	if err != nil {
+		logx.Std.Errorf("get skill failed: %s", err)
 		return nil, err
 	}
 	ent.Name = cmd.Name
 	ent.Description = cmd.Description
 	ent.UpdatedAt = time.Now().UTC()
 	if err := s.repo.Update(ctx, ent); err != nil {
+		logx.Std.Errorf("update skill failed: %s", err)
 		return nil, err
 	}
 	return toDTO(ent), nil
@@ -70,7 +75,11 @@ func (s *Service) Update(ctx context.Context, cmd UpdateSkillCommand) (*dto.Skil
 
 func (s *Service) Delete(ctx context.Context, id int64) error {
 	logx.Std.Tracef("delete skill %d", id)
-	return s.repo.Delete(ctx, skill.SkillID(id))
+	err := s.repo.Delete(ctx, skill.SkillID(id))
+	if err != nil {
+		logx.Std.Errorf("delete skill failed: %s", err)
+	}
+	return err
 }
 
 func toDTO(skl *skill.Skill) *dto.Skill {
