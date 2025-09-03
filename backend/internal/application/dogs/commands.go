@@ -7,13 +7,12 @@ type CreateDogCommand struct {
 }
 
 type UpdateDogCommand struct {
+	ID        int64
 	Name      string  `json:"name"`
 	Callname  *string `json:"callname,omitempty"`
 	Birthdate *string `json:"birthdate,omitempty"`
 }
 
 type DeleteDogCommand struct {
-	Name      string  `json:"name"`
-	Callname  *string `json:"callname,omitempty"`
-	Birthdate *string `json:"birthdate,omitempty"`
+	ID int64
 }

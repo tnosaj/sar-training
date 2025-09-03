@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/tnosaj/sar-training/backend/internal/domain/common"
 	"github.com/tnosaj/sar-training/backend/internal/domain/dog"
 	logx "github.com/tnosaj/sar-training/backend/internal/infra/log"
 )
@@ -26,23 +27,17 @@ func (r *DogsRepo) Create(ctx context.Context, d *dog.Dog) error {
 }
 
 func (r *DogsRepo) Update(ctx context.Context, d *dog.Dog) error {
-	res, err := r.db.ExecContext(ctx, `INSERT INTO dogs (name, callname, birthdate) VALUES (?, ?, ?)`, d.Name, d.Callname, d.Birthdate)
-	if err != nil {
-		return err
-	}
-	id, _ := res.LastInsertId()
-	d.ID = dog.DogID(id)
-	return nil
+	_, err := r.db.ExecContext(ctx, `UPDATE dogs set name=?, callname=?, birthdate=? WHERE id=?`, d.Name, *d.Callname, *d.Birthdate, d.ID)
+	return err
 }
 
 func (r *DogsRepo) Delete(ctx context.Context, id dog.DogID) error {
-	// res, err := r.db.ExecContext(ctx, `INSERT INTO dogs (name, callname, birthdate) VALUES (?, ?, ?)`, d.Name, d.Callname, d.Birthdate)
-	// if err != nil {
-	// 	return err
-	// }
-	// id, _ := res.LastInsertId()
-	// d.ID = dog.DogID(id)
-	return nil
+	res, err := r.db.ExecContext(ctx, `DELETE from dogs WHERE id=?`, id)
+	rows, _ := res.RowsAffected()
+	if rows == 0 {
+		return common.ErrNotFound
+	}
+	return err
 }
 
 func (r *DogsRepo) List(ctx context.Context) ([]*dog.Dog, error) {

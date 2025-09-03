@@ -127,6 +127,21 @@ curl -sX POST http://localhost:8080/dogs \
 curl -s http://localhost:8080/dogs | jq
 ```
 
+#### Update dog
+
+```
+curl -sX PUT http://localhost:8080/dogs/1 \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Kira","callname":"newname","birthdate":"2021-04-12T00:00:00Z"}'
+```
+
+#### Delete dog
+
+```
+curl -sX DELETE http://localhost:8080/dogs/1
+```
+
+
 ### Training sessions
 
 #### Create a session:
