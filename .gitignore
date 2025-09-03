@@ -1,3 +1,4 @@
+db/*
 backend/server
 backend/dogtracker.db
 webui/node_modules
