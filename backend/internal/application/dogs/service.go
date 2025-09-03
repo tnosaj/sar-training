@@ -34,7 +34,7 @@ func (s *Service) Update(ctx context.Context, cmd UpdateDogCommand) (*dto.Dog, e
 	if cmd.Name == "" {
 		return nil, common.ErrValidation
 	}
-	d := &dog.Dog{Name: cmd.Name, Callname: cmd.Callname, Birthdate: cmd.Birthdate}
+	d := &dog.Dog{ID: dog.DogID(cmd.ID), Name: cmd.Name, Callname: cmd.Callname, Birthdate: cmd.Birthdate}
 	if err := s.repo.Update(ctx, d); err != nil {
 		logx.Std.Errorf("update dog failed: %s", err)
 		return nil, err
@@ -42,17 +42,20 @@ func (s *Service) Update(ctx context.Context, cmd UpdateDogCommand) (*dto.Dog, e
 	return toDTO(d), nil
 }
 
-func (s *Service) Delete(ctx context.Context, cmd DeleteDogCommand) (*dto.Dog, error) {
+func (s *Service) Delete(ctx context.Context, cmd DeleteDogCommand) error {
 	logx.Std.Tracef("delete dog %v", cmd)
-	if cmd.Name == "" {
-		return nil, common.ErrValidation
+	if cmd.ID == 0 {
+		return common.ErrValidation
 	}
-	d := &dog.Dog{Name: cmd.Name, Callname: cmd.Callname, Birthdate: cmd.Birthdate}
-	if err := s.repo.Delete(ctx, d.ID); err != nil {
+	err := s.repo.Delete(ctx, dog.DogID(cmd.ID))
+	if err == common.ErrNotFound {
+		return err
+	}
+	if err != nil {
 		logx.Std.Errorf("delete dog failed: %s", err)
-		return nil, err
+		return err
 	}
-	return toDTO(d), nil
+	return nil
 }
 
 func (s *Service) List(ctx context.Context) ([]*dto.Dog, error) {

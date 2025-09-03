@@ -16,13 +16,18 @@ func NewRouter(
 ) http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(func(next http.Handler) http.Handler { return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
-		if req.Method == http.MethodOptions { w.WriteHeader(200); return }
-		next.ServeHTTP(w, req)
-	})})
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
+			if req.Method == http.MethodOptions {
+				w.WriteHeader(200)
+				return
+			}
+			next.ServeHTTP(w, req)
+		})
+	})
 
 	r.Get("/health", health)
 
@@ -49,6 +54,8 @@ func NewRouter(
 	r.Route("/dogs", func(r chi.Router) {
 		r.Get("/", dogs.List)
 		r.Post("/", dogs.Create)
+		r.Put("/{id}", dogs.Update)
+		r.Delete("/{id}", dogs.Delete)
 	})
 
 	r.Route("/sessions", func(r chi.Router) {
