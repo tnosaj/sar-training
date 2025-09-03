@@ -19,6 +19,43 @@ export default function DogsPage() {
     await apiFetch('/dogs', { method: 'POST', body: JSON.stringify({ name, callname: callname || undefined, birthdate: birthdate || undefined }) })
     setName(''); setCallname(''); setBirthdate(''); list.reload()
   }
+  // --- edit/delete state & handlers ---------------------------------------
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editCallname, setEditCallname] = useState('')
+  const [editBirthdate, setEditBirthdate] = useState('')
+
+  const startEdit = (d:any) => {
+    setEditingId(d.id)
+    setEditName(d.name || '')
+    setEditCallname(d.callname || '')
+    setEditBirthdate(d.birthdate || '')
+  }
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditName('')
+    setEditCallname('')
+    setEditBirthdate('')
+  }
+  const saveEdit = async () => {
+    if (!editingId) return
+    const payload:any = {
+      name: editName,
+      callname: editCallname || undefined,
+      birthdate: editBirthdate || undefined,
+    }
+    // optimistic
+    list.setItems(curr => curr.map((d:any) => d.id === editingId ? { ...d, ...payload } : d))
+    await apiFetch(`/dogs/${editingId}`, { method: 'PUT', body: JSON.stringify(payload) })
+    cancelEdit()
+  }
+  const deleteDog = async (id:number) => {
+    if (!confirm('Delete this dog?')) return
+    // optimistic
+    list.setItems(curr => curr.filter((d:any) => d.id !== id))
+    await apiFetch(`/dogs/${id}`, { method: 'DELETE' })
+  }
+
 
   return (
     <div className="grid md:grid-cols-3 gap-6">
@@ -32,10 +69,29 @@ export default function DogsPage() {
           <CardList items={list.items} empty={t('dogs.empty') as string}>
             {(d:any) => (
               <div>
-                <div className="font-semibold">{d.name} {d.callname ? `(${d.callname})` : ''}</div>
-                {d.birthdate && <div className="text-sm text-gray-600">{t('dogs.born')}: {d.birthdate}</div>}
-                <div className="text-xs text-gray-400">id: {d.id}</div>
+                {editingId === d.id ? (
+                  <div className="space-y-2">
+                    <Input label={t('dogs.name')} value={editName} onChange={e => setEditName(e.target.value)} />
+                    <Input label={t('dogs.callname_optional')} value={editCallname} onChange={e => setEditCallname(e.target.value)} />
+                    <Input label={t('dogs.birthdate_optional')} value={editBirthdate} onChange={e => setEditBirthdate(e.target.value)} />
+                    <div className="flex gap-2">
+                      <Button onClick={saveEdit}>{t('common.save')}</Button>
+                      <Button variant="secondary" onClick={cancelEdit}>{t('common.cancel')}</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="font-semibold">{d.name} {d.callname ? `(${d.callname})` : ''}</div>
+                    {d.birthdate && <div className="text-sm text-gray-600">Born: {d.birthdate}</div>}
+                    <div className="text-xs text-gray-400">id: {d.id}</div>
+                    <div className="flex gap-2 mt-2">
+                      <Button variant="secondary" onClick={() => startEdit(d)}>{t('common.edit')}</Button>
+                      <Button variant="danger" onClick={() => deleteDog(d.id)}>{t('common.delete')}</Button>
+                    </div>
+                  </>
+                )}
               </div>
+
             )}
           </CardList>
         </Section>

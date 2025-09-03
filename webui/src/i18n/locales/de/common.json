@@ -21,7 +21,11 @@
     "description": "Beschreibung",
     "name": "Name",
     "none_yet": "Noch keine",
-    "refresh": "Aktualisieren"
+    "refresh": "Aktualisieren",
+    "edit": "Editieren",
+    "delete": "Loeschen",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
   },
   "dashboard": {
     "quick_stats": "Kurzstatistik",
@@ -109,10 +113,9 @@
    },
    "settings": {
      "api_base": "API-Basis",
-    "blurb": "Lege die Basis-URL der API fest. In der Entwicklung leitet /api über den Vite-Proxy zu http://localhost:8080 weiter. In der Produktion kannst du eine vollständige URL angeben oder den /api-Pfad über deinen Reverse-Proxy beibehalten.",
-    "language": "Sprache",
-     "save": "Speichern",
-    "title": "Einstellungen"
+     "blurb": "Lege die Basis-URL der API fest. In der Entwicklung leitet /api über den Vite-Proxy zu http://localhost:8080 weiter. In der Produktion kannst du eine vollständige URL angeben oder den /api-Pfad über deinen Reverse-Proxy beibehalten.",
+     "language": "Sprache",
+     "title": "Einstellungen"
   },
   "skills": {
     "create_title": "Fähigkeit anlegen",

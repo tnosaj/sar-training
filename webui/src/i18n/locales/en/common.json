@@ -21,7 +21,11 @@
     "description": "Description",
     "name": "Name",
     "none_yet": "None yet",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "dashboard": {
     "quick_stats": "Quick Stats",
