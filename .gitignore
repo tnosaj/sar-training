@@ -1,4 +1,4 @@
-backend/backend
+backend/server
 backend/dogtracker.db
 webui/node_modules
 webui/tsconfig.tsbuildinfo

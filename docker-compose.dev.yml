@@ -6,6 +6,7 @@ services:
     environment:
       - PORT=8080
       - DB_PATH=/data/dogtracker.db
+      - LOG_LEVEL=trace
     volumes:
       - dbdata:/data
     ports:

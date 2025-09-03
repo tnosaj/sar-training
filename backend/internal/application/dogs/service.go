@@ -6,13 +6,18 @@ import (
 	"github.com/tnosaj/sar-training/backend/internal/application/dto"
 	"github.com/tnosaj/sar-training/backend/internal/domain/common"
 	"github.com/tnosaj/sar-training/backend/internal/domain/dog"
+	logx "github.com/tnosaj/sar-training/backend/internal/infra/log"
 )
 
 type Service struct{ repo dog.Repository }
 
-func NewService(r dog.Repository) *Service { return &Service{repo: r} }
+func NewService(r dog.Repository) *Service {
+	logx.Std.Trace("starting dogs service")
+	return &Service{repo: r}
+}
 
 func (s *Service) Create(ctx context.Context, cmd CreateDogCommand) (*dto.Dog, error) {
+	logx.Std.Tracef("create dog %v", cmd)
 	if cmd.Name == "" {
 		return nil, common.ErrValidation
 	}
@@ -24,6 +29,7 @@ func (s *Service) Create(ctx context.Context, cmd CreateDogCommand) (*dto.Dog, e
 }
 
 func (s *Service) Update(ctx context.Context, cmd UpdateDogCommand) (*dto.Dog, error) {
+	logx.Std.Tracef("update dog %v", cmd)
 	if cmd.Name == "" {
 		return nil, common.ErrValidation
 	}
@@ -35,6 +41,7 @@ func (s *Service) Update(ctx context.Context, cmd UpdateDogCommand) (*dto.Dog, e
 }
 
 func (s *Service) Delete(ctx context.Context, cmd DeleteDogCommand) (*dto.Dog, error) {
+	logx.Std.Tracef("delete dog %v", cmd)
 	if cmd.Name == "" {
 		return nil, common.ErrValidation
 	}
@@ -46,6 +53,7 @@ func (s *Service) Delete(ctx context.Context, cmd DeleteDogCommand) (*dto.Dog, e
 }
 
 func (s *Service) List(ctx context.Context) ([]*dto.Dog, error) {
+	logx.Std.Trace("list dogs")
 	items, err := s.repo.List(ctx)
 	if err != nil {
 		return nil, err

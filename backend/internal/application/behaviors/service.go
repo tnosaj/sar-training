@@ -7,13 +7,18 @@ import (
 	"github.com/tnosaj/sar-training/backend/internal/application/dto"
 	"github.com/tnosaj/sar-training/backend/internal/domain/behavior"
 	"github.com/tnosaj/sar-training/backend/internal/domain/common"
+	logx "github.com/tnosaj/sar-training/backend/internal/infra/log"
 )
 
 type Service struct{ repo behavior.Repository }
 
-func NewService(r behavior.Repository) *Service { return &Service{repo: r} }
+func NewService(r behavior.Repository) *Service {
+	logx.Std.Trace("starting behavior service")
+	return &Service{repo: r}
+}
 
 func (s *Service) Create(ctx context.Context, cmd CreateBehaviorCommand) (*dto.Behavior, error) {
+	logx.Std.Tracef("create behavior %v", cmd)
 	if cmd.SkillID <= 0 || cmd.Name == "" {
 		return nil, common.ErrValidation
 	}
@@ -26,6 +31,7 @@ func (s *Service) Create(ctx context.Context, cmd CreateBehaviorCommand) (*dto.B
 }
 
 func (s *Service) Update(ctx context.Context, cmd UpdateBehaviorCommand) (*dto.Behavior, error) {
+	logx.Std.Tracef("update behavior %v", cmd)
 	if cmd.SkillID <= 0 || cmd.Name == "" {
 		return nil, common.ErrValidation
 	}
@@ -38,6 +44,7 @@ func (s *Service) Update(ctx context.Context, cmd UpdateBehaviorCommand) (*dto.B
 }
 
 func (s *Service) Delete(ctx context.Context, cmd DeleteBehaviorCommand) (*dto.Behavior, error) {
+	logx.Std.Tracef("delete behavior %v", cmd)
 	if cmd.SkillID <= 0 || cmd.Name == "" {
 		return nil, common.ErrValidation
 	}
@@ -50,6 +57,7 @@ func (s *Service) Delete(ctx context.Context, cmd DeleteBehaviorCommand) (*dto.B
 }
 
 func (s *Service) List(ctx context.Context, q ListBehaviorsQuery) ([]*dto.Behavior, error) {
+	logx.Std.Tracef("list behavior %v", q)
 	items, err := s.repo.List(ctx, q.SkillID)
 	if err != nil {
 		return nil, err
