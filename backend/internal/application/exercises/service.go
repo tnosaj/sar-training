@@ -25,6 +25,7 @@ func (s *Service) Create(ctx context.Context, cmd CreateExerciseCommand) (*dto.E
 	now := time.Now().UTC()
 	e := &exercise.Exercise{Name: cmd.Name, Description: cmd.Description, CreatedAt: now, UpdatedAt: now}
 	if err := s.repo.Create(ctx, e); err != nil {
+		logx.Std.Errorf("create exercise failed: %s", err)
 		return nil, err
 	}
 	return toDTO(e), nil
@@ -34,6 +35,7 @@ func (s *Service) List(ctx context.Context) ([]*dto.Exercise, error) {
 	logx.Std.Trace("list exercises")
 	items, err := s.repo.List(ctx)
 	if err != nil {
+		logx.Std.Errorf("list exercise failed: %s", err)
 		return nil, err
 	}
 	out := make([]*dto.Exercise, 0, len(items))
@@ -50,7 +52,11 @@ func (s *Service) LinkBehavior(ctx context.Context, cmd LinkCommand) error {
 	if cmd.Strength < 1 || cmd.Strength > 5 {
 		return common.ErrValidation
 	}
-	return s.repo.LinkBehavior(ctx, cmd.BehaviorID, cmd.ExerciseID, cmd.Strength)
+	err := s.repo.LinkBehavior(ctx, cmd.BehaviorID, cmd.ExerciseID, cmd.Strength)
+	if err != nil {
+		logx.Std.Errorf("link behavior failed: %s", err)
+	}
+	return err
 }
 
 func toDTO(e *exercise.Exercise) *dto.Exercise {

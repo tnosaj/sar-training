@@ -26,6 +26,7 @@ func (s *Service) Create(ctx context.Context, cmd CreateSessionCommand) (*dto.Se
 	}
 	ent := &session.Session{StartedAt: *started, EndedAt: nil, Location: cmd.Location, Notes: cmd.Notes}
 	if err := s.repo.CreateSession(ctx, ent); err != nil {
+		logx.Std.Errorf("create session failed: %s", err)
 		return nil, err
 	}
 	return toSessionDTO(ent), nil
@@ -35,6 +36,7 @@ func (s *Service) List(ctx context.Context) ([]*dto.Session, error) {
 	logx.Std.Trace("list session")
 	items, err := s.repo.ListSessions(ctx)
 	if err != nil {
+		logx.Std.Errorf("list sessions failed: %s", err)
 		return nil, err
 	}
 	out := make([]*dto.Session, 0, len(items))
@@ -48,13 +50,18 @@ func (s *Service) AddDog(ctx context.Context, cmd AddDogCommand) error {
 	if cmd.SessionID <= 0 || cmd.DogID <= 0 {
 		return common.ErrValidation
 	}
-	return s.repo.AddDog(ctx, cmd.SessionID, cmd.DogID)
+	err := s.repo.AddDog(ctx, cmd.SessionID, cmd.DogID)
+	if err != nil {
+		logx.Std.Errorf("add dog failed: %s", err)
+	}
+	return err
 }
 
 func (s *Service) ListDogs(ctx context.Context, sessionID int64) ([]map[string]any, error) {
 	logx.Std.Tracef("ListDogs for %d", sessionID)
 	rows, err := s.repo.ListDogs(ctx, sessionID)
 	if err != nil {
+		logx.Std.Errorf("list dogs failed: %s", err)
 		return nil, err
 	}
 	out := make([]map[string]any, 0, len(rows))
@@ -68,6 +75,7 @@ func (s *Service) ListRounds(ctx context.Context, sessionID int64) ([]*dto.Round
 	logx.Std.Tracef("ListRounds for %d", sessionID)
 	rows, err := s.repo.ListRounds(ctx, sessionID)
 	if err != nil {
+		logx.Std.Errorf("list round failed: %s", err)
 		return nil, err
 	}
 	out := make([]*dto.Round, 0, len(rows))
@@ -92,6 +100,7 @@ func (s *Service) CreateRound(ctx context.Context, cmd CreateRoundCommand) (*dto
 		Notes: cmd.Notes, StartedAt: cmd.StartedAt, EndedAt: cmd.EndedAt,
 	}
 	if err := s.repo.CreateRound(ctx, r); err != nil {
+		logx.Std.Errorf("create round failed: %s", err)
 		return nil, err
 	}
 	return toRoundDTO(r), nil
