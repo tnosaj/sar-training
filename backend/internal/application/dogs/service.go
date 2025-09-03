@@ -23,6 +23,7 @@ func (s *Service) Create(ctx context.Context, cmd CreateDogCommand) (*dto.Dog, e
 	}
 	d := &dog.Dog{Name: cmd.Name, Callname: cmd.Callname, Birthdate: cmd.Birthdate}
 	if err := s.repo.Create(ctx, d); err != nil {
+		logx.Std.Errorf("create dog failed: %s", err)
 		return nil, err
 	}
 	return toDTO(d), nil
@@ -35,6 +36,7 @@ func (s *Service) Update(ctx context.Context, cmd UpdateDogCommand) (*dto.Dog, e
 	}
 	d := &dog.Dog{Name: cmd.Name, Callname: cmd.Callname, Birthdate: cmd.Birthdate}
 	if err := s.repo.Update(ctx, d); err != nil {
+		logx.Std.Errorf("update dog failed: %s", err)
 		return nil, err
 	}
 	return toDTO(d), nil
@@ -47,6 +49,7 @@ func (s *Service) Delete(ctx context.Context, cmd DeleteDogCommand) (*dto.Dog, e
 	}
 	d := &dog.Dog{Name: cmd.Name, Callname: cmd.Callname, Birthdate: cmd.Birthdate}
 	if err := s.repo.Delete(ctx, d.ID); err != nil {
+		logx.Std.Errorf("delete dog failed: %s", err)
 		return nil, err
 	}
 	return toDTO(d), nil
@@ -56,6 +59,7 @@ func (s *Service) List(ctx context.Context) ([]*dto.Dog, error) {
 	logx.Std.Trace("list dogs")
 	items, err := s.repo.List(ctx)
 	if err != nil {
+		logx.Std.Errorf("list dogs failed: %s", err)
 		return nil, err
 	}
 	out := make([]*dto.Dog, 0, len(items))
