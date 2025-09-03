@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/tnosaj/sar-training/backend/internal/adapters/httpapi"
 	"github.com/tnosaj/sar-training/backend/internal/adapters/sqlite"
 	"github.com/tnosaj/sar-training/backend/internal/application/behaviors"
@@ -19,10 +20,21 @@ import (
 func main() {
 	cfg := config.Load()
 
+	lvl, err := logrus.ParseLevel(cfg.LogLevel)
+	if err != nil {
+		logx.Std.SetLevel(logrus.WarnLevel)
+	} else {
+		logx.Std.SetLevel(lvl)
+	}
+
 	db, err := sqlite.Open(cfg.DBPath)
-	if err != nil { panic(err) }
+	if err != nil {
+		panic(err)
+	}
 	defer db.Close()
-	if err := sqlite.ApplyMigrations(db); err != nil { panic(err) }
+	if err := sqlite.ApplyMigrations(db); err != nil {
+		panic(err)
+	}
 
 	// repos
 	skRepo := sqlite.NewSkillsRepo(db.DB)
@@ -48,7 +60,7 @@ func main() {
 	r := httpapi.NewRouter(health(db), skH, bhH, exH, dgH, snH)
 
 	addr := ":" + cfg.Port
-	logx.Std.Printf("listening on %s", addr)
+	logx.Std.Infof("listening on %s", addr)
 	if err := http.ListenAndServe(addr, r); err != nil && err != http.ErrServerClosed {
 		panic(err)
 	}

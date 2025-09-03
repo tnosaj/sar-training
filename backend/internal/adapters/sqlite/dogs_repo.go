@@ -5,11 +5,15 @@ import (
 	"database/sql"
 
 	"github.com/tnosaj/sar-training/backend/internal/domain/dog"
+	logx "github.com/tnosaj/sar-training/backend/internal/infra/log"
 )
 
 type DogsRepo struct{ db *sql.DB }
 
-func NewDogsRepo(db *sql.DB) *DogsRepo { return &DogsRepo{db: db} }
+func NewDogsRepo(db *sql.DB) *DogsRepo {
+	logx.Std.Trace("starting dogs repo")
+	return &DogsRepo{db: db}
+}
 
 func (r *DogsRepo) Create(ctx context.Context, d *dog.Dog) error {
 	res, err := r.db.ExecContext(ctx, `INSERT INTO dogs (name, callname, birthdate) VALUES (?, ?, ?)`, d.Name, d.Callname, d.Birthdate)
