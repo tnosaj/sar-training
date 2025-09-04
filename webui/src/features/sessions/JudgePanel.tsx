@@ -1,97 +1,126 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Button } from '../../components/ui/Button'
 import { Select } from '../../components/ui/Select'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
-import { Section } from '../../components/ui/Section'
-import { usePlan } from './usePlanStore'
+import ScoreSlider from '../../components/ui/ScoreSlider'
 import { apiFetch } from '../../lib/api'
+import { useTranslation } from 'react-i18next'
 
-export default function JudgePanel({ sessionId, dogs, behaviors, exercises }:{ sessionId:number, dogs:any[], behaviors:any[], exercises:any[] }) {
-  const plan = usePlan(sessionId)
+type QItem = { dog_id:number; exercise_id:number; planned_behavior_id?:number }
+const qKey = (id:number) => `session:${id}:queue`
+
+function loadQueue(sessionId:number): QItem[] {
+  try { return JSON.parse(localStorage.getItem(qKey(sessionId)) || '[]') } catch { return [] }
+}
+function saveQueue(sessionId:number, items:QItem[]) {
+  localStorage.setItem(qKey(sessionId), JSON.stringify(items))
+}
+
+export default function JudgePanel({
+  session, dogs, behaviors, exercises, queueTick, onLogged,
+}:{
+  session:any
+  dogs:any
+  behaviors:any[]
+  exercises:any[]
+  queueTick:number
+  onLogged: () => void
+}) {
+  const { t } = useTranslation()
+  
+  const [queue, setQueue] = useState<QItem[]>(() => loadQueue(session.id))
   const [outcome, setOutcome] = useState<'success'|'partial'|'fail'>('success')
-  const [score, setScore] = useState<number|''>('' as any)
-  const [notes, setNotes] = useState('')
-  const [exhibitedBehaviorId, setExhibitedBehaviorId] = useState<number|''>('' as any)
+  const [exhibitedBehaviorId, setExhibitedBehaviorId] = useState('')
   const [exhibitedFreeText, setExhibitedFreeText] = useState('')
-  const [submitting, setSubmitting] = useState(false)
+  const [score, setScore] = useState<number | undefined>(undefined);
+  const [notes, setNotes] = useState('')
 
-  const current = plan.queue[0]
+  // reload when parent bumps or session changes
+  useEffect(() => { setQueue(loadQueue(session.id)) }, [session.id, queueTick])
 
-  const canSubmit = !!(current && current.dog_id && current.planned_behavior_id && current.exercise_id)
+  const next = queue[0]
+  const exerName = (id:number) => exercises.find((x:any)=>x.id===id)?.name || `#${id}`
+  const behName = (id:number|undefined) => id ? (behaviors.find((b:any)=>b.id===id)?.name || `#${id}`) : '—'
+  const dogName = (id:number|undefined) => id ? (dogs.find((b:any)=>b.id===id)?.name || `#${id}`) : '—'
 
-  async function submitNow() {
-    if (!current) return
-    if (!canSubmit) return alert('Please choose dog, planned behavior and exercise first.')
-    setSubmitting(true)
-    try {
-      await apiFetch(`/sessions/${sessionId}/rounds`, {
-        method: 'POST',
-        body: JSON.stringify({
-          dog_id: current.dog_id,
-          exercise_id: current.exercise_id,
-          planned_behavior_id: current.planned_behavior_id,
-          exhibited_behavior_id: exhibitedBehaviorId || undefined,
-          exhibited_free_text: exhibitedFreeText || undefined,
-          notes: notes || undefined,
-          outcome,
-          score: score === '' ? undefined : Number(score),
-        })
-      })
-      plan.popFront()
-      setOutcome('success'); setScore('' as any); setNotes(''); setExhibitedBehaviorId('' as any); setExhibitedFreeText('')
-    } catch (e:any) {
-      alert(e.message || String(e))
-    } finally { setSubmitting(false) }
+  const canLog = !!next
+
+  async function logResult() {
+    if (!next) return
+    const payload:any = {
+      dog_id: next.dog_id,
+      exercise_id: next.exercise_id,
+      planned_behavior_id: next.planned_behavior_id || undefined,
+      outcome,
+      score: score ? Number(score) : undefined,
+      notes: notes || undefined,
+      started_at: new Date().toISOString(),
+      ended_at: new Date().toISOString(),
+      exhibited_behavior_id: exhibitedBehaviorId ? Number(exhibitedBehaviorId) : undefined,
+      exhibited_free_text: exhibitedFreeText || undefined,
+    }
+    await apiFetch(`/sessions/${session.id}/rounds`, { method: 'POST', body: JSON.stringify(payload) })
+
+    // pop the item we just judged
+    const rest = queue.slice(1)
+    setQueue(rest); saveQueue(session.id, rest)
+
+    // reset form bits
+    setOutcome('success'); setExhibitedBehaviorId(''); setExhibitedFreeText(''); setScore(5); setNotes('')
+
+    // let parent refresh any tables
+    onLogged()
   }
+
+  const plannedSummary = useMemo(() => {
+    if (!next) return 'No planned items. Save a plan in the section above, then come back here.'
+    return `${exerName(next.exercise_id)} (planned: ${behName(next.planned_behavior_id)})`
+  }, [next, exercises, behaviors])
+
+    const plannedDog = useMemo(() => {
+    if (!next) return 'No planned items. Save a plan in the section above, then come back here.'
+    return `${dogName(next.dog_id)}`
+  }, [next, dogs])
+
 
   return (
     <div className="space-y-4">
-      <Section title="Current Dog">
-        {current ? (
-          <div className="space-y-3">
-            <div className="grid grid-cols-1 gap-2">
-              <Select label="Dog" value={String(current.dog_id||'')} onChange={e => plan.update(0, { dog_id: Number(e.target.value) })}>
-                <option value="">-- choose dog --</option>
-                {dogs.map((d:any) => <option key={d.id} value={d.id}>{d.name}</option>)}
-              </Select>
-              <Select label="Exercise" value={String(current.exercise_id||'')} onChange={e => plan.update(0, { exercise_id: e.target.value ? Number(e.target.value) : undefined })}>
-                <option value="">-- choose exercise --</option>
-                {exercises.map((x:any) => <option key={x.id} value={x.id}>{x.name}</option>)}
-              </Select>
-              <Select label="Planned Behavior" value={String(current.planned_behavior_id||'')} onChange={e => plan.update(0, { planned_behavior_id: e.target.value ? Number(e.target.value) : undefined })}>
-                <option value="">-- choose behavior --</option>
-                {behaviors.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </Select>
-            </div>
-            <div className="grid grid-cols-1 gap-2">
-              <div>
-                <div className="text-sm text-gray-700 mb-1">Outcome</div>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button variant={outcome==='success'?'primary':'secondary'} onClick={()=>setOutcome('success')}>Success</Button>
-                  <Button variant={outcome==='partial'?'primary':'secondary'} onClick={()=>setOutcome('partial')}>Partial</Button>
-                  <Button variant={outcome==='fail'?'primary':'secondary'} onClick={()=>setOutcome('fail')}>Fail</Button>
-                </div>
-              </div>
-              <div>
-                <Input label="Score (0-10 optional)" type="number" min={0} max={10} value={String(score)} onChange={e => setScore(e.target.value===''?'':Number(e.target.value))} />
-              </div>
-              <Textarea label="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Observations…" />
-              <Select label="Exhibited Behavior (optional)" value={String(exhibitedBehaviorId||'')} onChange={e => setExhibitedBehaviorId(e.target.value ? Number(e.target.value) : ('' as any))}>
-                <option value="">(none / free text)</option>
-                {behaviors.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </Select>
-              <Input label="Exhibited Free Text (optional)" value={exhibitedFreeText} onChange={e => setExhibitedFreeText(e.target.value)} placeholder="Offered down" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="secondary" onClick={() => plan.popFront()} disabled={!current}>Skip</Button>
-              <Button onClick={submitNow} disabled={!canSubmit || submitting}>{submitting ? 'Submitting…' : 'Submit & Next'}</Button>
-            </div>
-          </div>
+      <div className="text-sm text-gray-600">Judge — Session #{session.id}</div>
+
+      <div className="flex items-center gap-2">
+        <div className="text-sm text-gray-700">Queue length:</div>
+        <div className="text-sm font-medium">{queue.length}</div>
+        <Button variant="secondary" onClick={() => setQueue(loadQueue(session.id))}>Refresh</Button>
+      </div>
+
+      <div className="border rounded-xl p-3 bg-white">
+        <div className="font-medium mb-2">Current dog: {plannedDog}</div>
+        <div className="text-sm text-gray-700 mb-3">{plannedSummary}</div>
+
+        {!next ? (
+          <div className="text-sm text-gray-500">No items planned.</div>
         ) : (
-          <p className="text-sm text-gray-500">Queue is empty. Add items on the Organize tab.</p>
+          <div className="grid md:grid-cols-2 gap-3">
+            <Select label="Outcome" value={outcome} onChange={e => setOutcome(e.target.value as any)}>
+              <option value="success">success</option>
+              <option value="partial">partial</option>
+              <option value="fail">fail</option>
+            </Select>
+            <ScoreSlider label="Score (0–10, optional)" value={score} min={0} max={10} step={1} initialValue={5} onChange={setScore} />
+            <Select label="Exhibited behavior (optional)" value={exhibitedBehaviorId} onChange={e => setExhibitedBehaviorId(e.target.value)}>
+              <option value="">—</option>
+              {behaviors.map((b:any)=> <option key={b.id} value={b.id}>{b.name}</option>)}
+            </Select>
+            <Input label="Exhibited (free text, optional)" value={exhibitedFreeText} onChange={e => setExhibitedFreeText(e.target.value)} placeholder="Offered down" />
+            <Textarea label="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Observations…" />
+          </div>
         )}
-      </Section>
+
+        <div className="mt-3">
+          <Button onClick={logResult} disabled={!canLog}>Log result &amp; advance</Button>
+        </div>
+      </div>
     </div>
   )
 }
