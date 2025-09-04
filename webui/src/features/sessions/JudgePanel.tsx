@@ -1,97 +1,116 @@
-import React, { useState } from 'react'
-import { Button } from '../../components/ui/Button'
-import { Select } from '../../components/ui/Select'
+import React, { useEffect, useState } from 'react'
 import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
-import { Section } from '../../components/ui/Section'
-import { usePlan } from './usePlanStore'
+import { Select } from '../../components/ui/Select'
+import { Button } from '../../components/ui/Button'
 import { apiFetch } from '../../lib/api'
+import { PLAN_KEY } from './PlanOrganize'
+import { useTranslation } from 'react-i18next'
 
-export default function JudgePanel({ sessionId, dogs, behaviors, exercises }:{ sessionId:number, dogs:any[], behaviors:any[], exercises:any[] }) {
-  const plan = usePlan(sessionId)
-  const [outcome, setOutcome] = useState<'success'|'partial'|'fail'>('success')
-  const [score, setScore] = useState<number|''>('' as any)
+
+type Outcome = 'success'|'partial'|'fail'
+type PlanItem = { dog_id:number; exercise_id:number; planned_behavior_id?:number }
+
+export default function JudgePanel({ session, dogs, behaviors, exercises }:{
+  session: any
+  dogs: any[]
+  behaviors: any[]
+  exercises: any[]
+}) {
+  const { t } = useTranslation()
+  
+  const [plan, setPlan] = useState<PlanItem[]>([])
+  const [idx, setIdx] = useState(0)
+
+  const [outcome, setOutcome] = useState<Outcome>('success')
+  const [score, setScore] = useState('')
   const [notes, setNotes] = useState('')
-  const [exhibitedBehaviorId, setExhibitedBehaviorId] = useState<number|''>('' as any)
+  const [exhibitedBehaviorId, setExhibitedBehaviorId] = useState('')
   const [exhibitedFreeText, setExhibitedFreeText] = useState('')
-  const [submitting, setSubmitting] = useState(false)
+  const [startedAt, setStartedAt] = useState('')
+  const [endedAt, setEndedAt] = useState('')
 
-  const current = plan.queue[0]
+  useEffect(() => {
+    const raw = localStorage.getItem(PLAN_KEY(session.id))
+    let q: PlanItem[] = []
+    try { q = raw ? JSON.parse(raw) : [] } catch { q = [] }
+    setPlan(Array.isArray(q) ? q : [])
+    setIdx(0)
+  }, [session.id])
 
-  const canSubmit = !!(current && current.dog_id && current.planned_behavior_id && current.exercise_id)
+  const current = plan[idx]
+  const dogName      = (id?:number) => dogs.find((d:any)=>d.id===id)?.name || id
+  const exerciseName = (id?:number) => exercises.find((x:any)=>x.id===id)?.name || id
+  const behaviorName = (id?:number) => behaviors.find((b:any)=>b.id===id)?.name || id
 
-  async function submitNow() {
+  const submit = async () => {
     if (!current) return
-    if (!canSubmit) return alert('Please choose dog, planned behavior and exercise first.')
-    setSubmitting(true)
-    try {
-      await apiFetch(`/sessions/${sessionId}/rounds`, {
-        method: 'POST',
-        body: JSON.stringify({
-          dog_id: current.dog_id,
-          exercise_id: current.exercise_id,
-          planned_behavior_id: current.planned_behavior_id,
-          exhibited_behavior_id: exhibitedBehaviorId || undefined,
-          exhibited_free_text: exhibitedFreeText || undefined,
-          notes: notes || undefined,
-          outcome,
-          score: score === '' ? undefined : Number(score),
-        })
-      })
-      plan.popFront()
-      setOutcome('success'); setScore('' as any); setNotes(''); setExhibitedBehaviorId('' as any); setExhibitedFreeText('')
-    } catch (e:any) {
-      alert(e.message || String(e))
-    } finally { setSubmitting(false) }
+    const payload:any = {
+      dog_id: current.dog_id,
+      exercise_id: current.exercise_id,
+      planned_behavior_id: current.planned_behavior_id ?? (exhibitedBehaviorId ? Number(exhibitedBehaviorId) : undefined) ?? 0,
+      outcome,
+      notes: notes || undefined,
+      score: score ? Number(score) : undefined,
+      started_at: startedAt || undefined,
+      ended_at: endedAt || undefined,
+      exhibited_behavior_id: exhibitedBehaviorId ? Number(exhibitedBehaviorId) : undefined,
+      exhibited_free_text: exhibitedFreeText || undefined,
+    }
+    if (!payload.planned_behavior_id) {
+      alert('Planned behavior is required (from plan or choose one).')
+      return
+    }
+
+    await apiFetch(`/sessions/${session.id}/rounds`, { method: 'POST', body: JSON.stringify(payload) })
+    setOutcome('success'); setScore(''); setNotes(''); setExhibitedBehaviorId(''); setExhibitedFreeText(''); setStartedAt(''); setEndedAt('')
+    if (idx < plan.length - 1) setIdx(i => i + 1)
+    else alert('Finished planned queue!')
   }
+
+  const skip = () => { if (idx < plan.length - 1) setIdx(i => i + 1) }
 
   return (
     <div className="space-y-4">
-      <Section title="Current Dog">
-        {current ? (
-          <div className="space-y-3">
-            <div className="grid grid-cols-1 gap-2">
-              <Select label="Dog" value={String(current.dog_id||'')} onChange={e => plan.update(0, { dog_id: Number(e.target.value) })}>
-                <option value="">-- choose dog --</option>
-                {dogs.map((d:any) => <option key={d.id} value={d.id}>{d.name}</option>)}
-              </Select>
-              <Select label="Exercise" value={String(current.exercise_id||'')} onChange={e => plan.update(0, { exercise_id: e.target.value ? Number(e.target.value) : undefined })}>
-                <option value="">-- choose exercise --</option>
-                {exercises.map((x:any) => <option key={x.id} value={x.id}>{x.name}</option>)}
-              </Select>
-              <Select label="Planned Behavior" value={String(current.planned_behavior_id||'')} onChange={e => plan.update(0, { planned_behavior_id: e.target.value ? Number(e.target.value) : undefined })}>
-                <option value="">-- choose behavior --</option>
-                {behaviors.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </Select>
+      {!current && <p className="text-sm text-gray-600">No planned items. Save a plan in the section above, then come back here.</p>}
+
+      {current && (
+        <>
+          <div className="bg-white border rounded-2xl p-4">
+            <div className="text-sm text-gray-600">Now judging</div>
+            <div className="text-xl font-semibold">
+              {dogName(current.dog_id)} • {exerciseName(current.exercise_id)}
             </div>
-            <div className="grid grid-cols-1 gap-2">
-              <div>
-                <div className="text-sm text-gray-700 mb-1">Outcome</div>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button variant={outcome==='success'?'primary':'secondary'} onClick={()=>setOutcome('success')}>Success</Button>
-                  <Button variant={outcome==='partial'?'primary':'secondary'} onClick={()=>setOutcome('partial')}>Partial</Button>
-                  <Button variant={outcome==='fail'?'primary':'secondary'} onClick={()=>setOutcome('fail')}>Fail</Button>
-                </div>
-              </div>
-              <div>
-                <Input label="Score (0-10 optional)" type="number" min={0} max={10} value={String(score)} onChange={e => setScore(e.target.value===''?'':Number(e.target.value))} />
-              </div>
-              <Textarea label="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Observations…" />
-              <Select label="Exhibited Behavior (optional)" value={String(exhibitedBehaviorId||'')} onChange={e => setExhibitedBehaviorId(e.target.value ? Number(e.target.value) : ('' as any))}>
-                <option value="">(none / free text)</option>
-                {behaviors.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </Select>
-              <Input label="Exhibited Free Text (optional)" value={exhibitedFreeText} onChange={e => setExhibitedFreeText(e.target.value)} placeholder="Offered down" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="secondary" onClick={() => plan.popFront()} disabled={!current}>Skip</Button>
-              <Button onClick={submitNow} disabled={!canSubmit || submitting}>{submitting ? 'Submitting…' : 'Submit & Next'}</Button>
-            </div>
+            {current.planned_behavior_id && (
+              <div className="text-sm text-gray-600">Planned behavior: {behaviorName(current.planned_behavior_id)}</div>
+            )}
           </div>
-        ) : (
-          <p className="text-sm text-gray-500">Queue is empty. Add items on the Organize tab.</p>
-        )}
-      </Section>
+
+          <div className="grid md:grid-cols-2 gap-3">
+            <Select label="Outcome" value={outcome} onChange={e => setOutcome(e.target.value as Outcome)}>
+              <option value="success">success</option>
+              <option value="partial">partial</option>
+              <option value="fail">fail</option>
+            </Select>
+            <Input label="Score (0-10, optional)" type="number" min={0} max={10} value={score} onChange={e => setScore(e.target.value)} />
+            <Input label="Started at (RFC3339, optional)" value={startedAt} onChange={e => setStartedAt(e.target.value)} placeholder="2025-09-04T18:05:00Z" />
+            <Input label="Ended at (RFC3339, optional)" value={endedAt} onChange={e => setEndedAt(e.target.value)} placeholder="2025-09-04T18:07:00Z" />
+            <Select label="Exhibited Behavior (optional)" value={exhibitedBehaviorId} onChange={e => setExhibitedBehaviorId(e.target.value)}>
+              <option value="">(none / free text)</option>
+              {behaviors.map((b:any) => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </Select>
+            <Input label="Exhibited Free Text (optional)" value={exhibitedFreeText} onChange={e => setExhibitedFreeText(e.target.value)} placeholder="Offered down" />
+          </div>
+          <Textarea label="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Observations…" />
+
+          <div className="flex gap-2">
+            <Button variant="secondary" onClick={skip}>Skip</Button>
+            <Button onClick={submit}>Log & Next</Button>
+          </div>
+
+          <div className="text-xs text-gray-500">Item {idx+1} of {plan.length}</div>
+        </>
+      )}
     </div>
   )
 }

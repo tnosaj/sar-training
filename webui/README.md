@@ -23,6 +23,14 @@ npm i
 npm run dev
 ```
 
+## update package-lock.json
+```
+docker run -it -v `pwd`:/tmp --entrypoint=/bin/sh node:20-alpine
+cd /tmp/webui
+npm install --package-lock-only
+npm install # this updates the node_modules dir
+```
+
 ## Build
 ```bash
 npm run build
