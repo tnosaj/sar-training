@@ -7,6 +7,8 @@ import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import PlanOrganize from './PlanOrganize'
 import JudgePanel from './JudgePanel'
+import ReviewPanel from './ReviewPanel'
+
 import { useTranslation } from 'react-i18next'
 
 const LS_LAST_SESSION = 'ui.lastSessionId'
@@ -21,7 +23,8 @@ export default function SessionsPage() {
   const [location, setLocation] = useState('')
   const [notes, setNotes] = useState('')
   const [selectedId, setSelectedId] = useState<number | null>(null)
-  const [mode, setMode] = useState<'organize' | 'judge'>('organize')
+  type Mode = 'organize' | 'judge' | 'review'
+  const [mode, setMode] = useState<Mode>('organize')
 
   // bump this to force JudgePanel to reload the queue
   const [queueTick, setQueueTick] = useState(0)
@@ -80,10 +83,11 @@ export default function SessionsPage() {
                 <div className="flex gap-2">
                   <Button variant={mode === 'organize' ? 'primary' : 'secondary'} onClick={() => setMode('organize')}>Organize</Button>
                   <Button variant={mode === 'judge' ? 'primary' : 'secondary'} onClick={() => setMode('judge')}>Judge</Button>
+                  <Button variant={mode === 'review' ? 'primary' : 'secondary'} onClick={() => setMode('review')}>Review</Button>
                 </div>
               }
             >
-              {mode === 'organize' ? (
+              {mode === 'organize' && (
                 <PlanOrganize
                   session={selected}
                   dogs={dogs.items}
@@ -91,7 +95,8 @@ export default function SessionsPage() {
                   exercises={exercises.items}
                   onSaved={onQueueSaved}
                 />
-              ) : (
+              )}
+              {mode === 'judge' && (
                 <JudgePanel
                   key={selected.id} /* ensure remount when switching sessions */
                   session={selected}
@@ -100,6 +105,14 @@ export default function SessionsPage() {
                   exercises={exercises.items}
                   queueTick={queueTick}
                   onLogged={onLogged}
+                />
+              )}
+              {mode === 'review' && (
+                <ReviewPanel
+                  session={selected}
+                  dogs={dogs.items}
+                  behaviors={behaviors.items}
+                  exercises={exercises.items}
                 />
               )}
             </Section>
