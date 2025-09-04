@@ -15,92 +15,99 @@ export default function SessionsPage() {
   const { t } = useTranslation()
   const sessions = useList<any>(() => apiFetch('/sessions'))
   const dogs = useList<any>(() => apiFetch('/dogs'))
-  const behaviorsList = useList<any>(() => apiFetch('/behaviors'))
-  const exercisesList = useList<any>(() => apiFetch('/exercises'))
+  const behaviors = useList<any>(() => apiFetch('/behaviors'))
+  const exercises = useList<any>(() => apiFetch('/exercises'))
 
   const [location, setLocation] = useState('')
   const [notes, setNotes] = useState('')
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [mode, setMode] = useState<'organize' | 'judge'>('organize')
 
-  const [selectedId, setSelectedId] = useState<number | null>(() => {
-    const saved = localStorage.getItem(LS_LAST_SESSION)
-    return saved ? Number(saved) : null
-  })
-  useEffect(() => {
-    if (selectedId) localStorage.setItem(LS_LAST_SESSION, String(selectedId))
-  }, [selectedId])
+  // bump this to force JudgePanel to reload the queue
+  const [queueTick, setQueueTick] = useState(0)
 
-  useEffect(() => {
-    if (!selectedId && sessions.items.length) {
-      setSelectedId(sessions.items[0].id)
-    }
-  }, [selectedId, sessions.items])
-
-  const selectedSession = useMemo(
-    () => sessions.items.find((x:any) => x.id === selectedId) || null,
-    [selectedId, sessions.items]
+  const selected = useMemo(
+    () => sessions.items.find((s:any) => s.id === selectedId) || sessions.items[0],
+    [sessions.items, selectedId]
   )
 
   const createSession = async () => {
-    const s = await apiFetch('/sessions', { method: 'POST', body: JSON.stringify({ location: location || undefined, notes: notes || undefined }) })
+    const s = await apiFetch('/sessions', {
+      method: 'POST',
+      body: JSON.stringify({ location: location || undefined, notes: notes || undefined })
+    })
     setLocation(''); setNotes('')
-    sessions.reload()
+    await sessions.reload()
     setSelectedId(s.id)
   }
 
+  const onQueueSaved = () => setQueueTick(x => x + 1)
+  const onLogged = () => setQueueTick(x => x + 1) // judge logged a round → refresh queue + its table
+
   return (
-    <div className="grid md:grid-cols-3 gap-6">
-      <div className="md:col-span-1 space-y-4">
+    <div className="grid md:grid-cols-[320px,1fr] gap-6">
+      {/* Left */}
+      <div className="space-y-6">
         <Section title="Create Session" actions={<Button onClick={createSession}>Create</Button>}>
           <Input label="Location (optional)" value={location} onChange={e => setLocation(e.target.value)} placeholder="Training field" />
           <Textarea label="Notes (optional)" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Evening work" />
         </Section>
 
         <Section title="Sessions" actions={<Button variant="secondary" onClick={sessions.reload}>Refresh</Button>}>
-          <ul className="divide-y rounded-2xl border overflow-hidden bg-white">
+          <ul className="space-y-2">
             {sessions.items.map((s:any) => (
               <li key={s.id}>
                 <button
-                  className={'w-full text-left px-3 py-2 hover:bg-gray-50 ' + (selectedId===s.id ? 'bg-indigo-50' : '')}
-                  onClick={() => setSelectedId(s.id)}
+                  className={`w-full text-left px-3 py-2 rounded-xl border ${selected?.id === s.id ? 'bg-indigo-50 border-indigo-200' : 'bg-white hover:bg-gray-50'}`}
+                  onClick={() => { setSelectedId(s.id); setMode('organize') }}
                 >
                   <div className="font-medium">Session #{s.id}</div>
-                  <div className="text-xs text-gray-600">{s.started_at}</div>
-                  {s.location && <div className="text-xs text-gray-600">📍 {s.location}</div>}
+                  <div className="text-xs text-gray-500">{s.started_at}</div>
                 </button>
               </li>
             ))}
-            {!sessions.items.length && <li className="p-3 text-sm text-gray-500">No sessions yet.</li>}
           </ul>
         </Section>
       </div>
 
-      <div className="md:col-span-2 space-y-6">
-        {!selectedSession && (
-          <Section title="No session selected">
-            <p className="text-sm text-gray-600">Pick a session from the list to plan and judge rounds.</p>
-          </Section>
-        )}
-
-        {selectedSession && (
+      {/* Right */}
+      <div className="space-y-6">
+        {selected ? (
           <>
-            <Section title={`Plan — Session #${selectedSession.id}`}>
-              <PlanOrganize
-                session={selectedSession}
-                dogs={dogs.items}
-                behaviors={behaviorsList.items}
-                exercises={exercisesList.items}
-              />
-            </Section>
-
-            <Section title={`Judge — Session #${selectedSession.id}`}>
-              <JudgePanel
-                session={selectedSession}
-                dogs={dogs.items}
-                behaviors={behaviorsList.items}
-                exercises={exercisesList.items}
-              />
+            <Section
+              title="Session Details"
+              actions={
+                <div className="flex gap-2">
+                  <Button variant={mode === 'organize' ? 'primary' : 'secondary'} onClick={() => setMode('organize')}>Organize</Button>
+                  <Button variant={mode === 'judge' ? 'primary' : 'secondary'} onClick={() => setMode('judge')}>Judge</Button>
+                </div>
+              }
+            >
+              {mode === 'organize' ? (
+                <PlanOrganize
+                  session={selected}
+                  dogs={dogs.items}
+                  behaviors={behaviors.items}
+                  exercises={exercises.items}
+                  onSaved={onQueueSaved}
+                />
+              ) : (
+                <JudgePanel
+                  key={selected.id} /* ensure remount when switching sessions */
+                  session={selected}
+                  dogs={dogs.items}
+                  behaviors={behaviors.items}
+                  exercises={exercises.items}
+                  queueTick={queueTick}
+                  onLogged={onLogged}
+                />
+              )}
             </Section>
           </>
+        ) : (
+          <Section title="Session Details">
+            <p className="text-gray-600 text-sm">Select a session on the left.</p>
+          </Section>
         )}
       </div>
     </div>
