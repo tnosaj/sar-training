@@ -5,6 +5,7 @@ import { Section } from '../../components/ui/Section'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { CardList } from '../../components/ui/CardList'
+import DogStatsPanel from './DogStatsPanel'
 import { useTranslation } from 'react-i18next'
 
 export default function DogsPage() {
@@ -24,6 +25,9 @@ export default function DogsPage() {
   const [editName, setEditName] = useState('')
   const [editCallname, setEditCallname] = useState('')
   const [editBirthdate, setEditBirthdate] = useState('')
+
+  const [selectedDog, setSelectedDog] = useState<any|null>(null)
+  const [statsOpen, setStatsOpen] = useState(false)
 
   const startEdit = (d:any) => {
     setEditingId(d.id)
@@ -66,6 +70,7 @@ export default function DogsPage() {
       </Section>
       <div className="md:col-span-2">
         <Section title={t('dogs.list_title')} actions={<Button variant="secondary" onClick={list.reload}>{t('common.refresh')}</Button>}>
+          <DogStatsPanel dog={selectedDog} open={statsOpen} onClose={() => setStatsOpen(false)} />
           <CardList items={list.items} empty={t('dogs.empty') as string}>
             {(d:any) => (
               <div>
@@ -81,7 +86,9 @@ export default function DogsPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="font-semibold">{d.name} {d.callname ? `(${d.callname})` : ''}</div>
+                    <div className="font-semibold">{d.name} {d.callname ? `(${d.callname})` : ''}
+                    <Button variant="secondary" onClick={() => { setSelectedDog(d); setStatsOpen(true) }} >{t('dogs.view_stats')}</Button>
+                    </div>
                     {d.birthdate && <div className="text-sm text-gray-600">Born: {d.birthdate}</div>}
                     <div className="text-xs text-gray-400">id: {d.id}</div>
                     <div className="flex gap-2 mt-2">
