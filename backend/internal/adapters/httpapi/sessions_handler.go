@@ -99,3 +99,20 @@ func (h *SessionsHandler) CreateRound(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, 201, res)
 }
+
+
+// GET /dogs/{id}/rounds
+func (h *SessionsHandler) ListRoundsByDog(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	dogID, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		writeError(w, 400, "invalid dog id")
+		return
+	}
+	items, err := h.svc.ListRoundsByDog(r.Context(), dogID)
+	if err != nil {
+		writeError(w, 500, err.Error())
+		return
+	}
+	writeJSON(w, 200, items)
+}

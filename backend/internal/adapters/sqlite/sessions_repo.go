@@ -106,3 +106,36 @@ func (r *SessionsRepo) ListRounds(ctx context.Context, sessionID int64) ([]*sess
 	}
 	return out, rows.Err()
 }
+
+
+func (r *SessionsRepo) ListRoundsByDog(ctx context.Context, dogID int64) ([]*session.Round, error) {
+	rows, err := r.db.QueryContext(ctx, `SELECT id, session_id, round_number, dog_id, exercise_id, planned_behavior_id, exhibited_behavior_id, outcome, score, notes, started_at, ended_at, exhibited_free_text FROM rounds WHERE dog_id=? ORDER BY session_id ASC, round_number ASC`, dogID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*session.Round
+	for rows.Next() {
+		var ro session.Round
+		var exhibited sql.NullInt64
+		var score sql.NullInt64
+		var notes sql.NullString
+		var sstart sql.NullString
+		var send sql.NullString
+		var free sql.NullString
+		if err := rows.Scan(&ro.ID, &ro.SessionID, &ro.RoundNumber, &ro.DogID, &ro.ExerciseID, &ro.PlannedBehaviorID, &exhibited, &ro.Outcome, &score, &notes, &sstart, &send, &free); err != nil {
+			return nil, err
+		}
+		if exhibited.Valid { v := exhibited.Int64; ro.ExhibitedBehaviorID = &v }
+		if score.Valid { v := int(score.Int64); ro.Score = &v }
+		if notes.Valid { ro.Notes = &notes.String }
+		if sstart.Valid { ro.StartedAt = &sstart.String }
+		if send.Valid { ro.EndedAt = &send.String }
+		if free.Valid { ro.ExhibitedFreeText = &free.String }
+		out = append(out, &ro)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
