@@ -113,3 +113,15 @@ func toSessionDTO(ses *session.Session) *dto.Session {
 func toRoundDTO(r *session.Round) *dto.Round {
 	return &dto.Round{ID: r.ID, SessionID: r.SessionID, RoundNumber: r.RoundNumber, DogID: r.DogID, ExerciseID: r.ExerciseID, PlannedBehaviorID: r.PlannedBehaviorID, ExhibitedBehaviorID: r.ExhibitedBehaviorID, ExhibitedFreeText: r.ExhibitedFreeText, Outcome: r.Outcome, Score: r.Score, Notes: r.Notes, StartedAt: r.StartedAt, EndedAt: r.EndedAt}
 }
+
+func (s *Service) ListRoundsByDog(ctx context.Context, dogID int64) ([]*dto.Round, error) {
+	items, err := s.repo.ListRoundsByDog(ctx, dogID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*dto.Round, 0, len(items))
+	for _, r := range items {
+		out = append(out, toRoundDTO(r))
+	}
+	return out, nil
+}

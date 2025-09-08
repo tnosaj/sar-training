@@ -11,4 +11,5 @@ type Repository interface {
 
 	CreateRound(ctx context.Context, r *Round) error
 	ListRounds(ctx context.Context, sessionID int64) ([]*Round, error)
+	ListRoundsByDog(ctx context.Context, dogID int64) ([]*Round, error)
 }

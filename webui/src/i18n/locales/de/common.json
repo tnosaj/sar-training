@@ -38,7 +38,21 @@
     "create_title": "Hund anlegen",
     "empty": "Noch keine Hunde.",
     "list_title": "Alle Hunde",
-    "name": "Name"
+    "name": "Name",
+    "view_stats": "statistik",
+    "stats_title": "Hundestatistiken",
+    "total_rounds": "Gesamte Runden",
+    "success_rate": "Erfolgsquote",
+    "avg_score": "Durchschn. Punktzahl",
+    "recent_rounds": "Letzte Runden",
+    "no_rounds": "Noch keine Runden.",
+    "round_num": "#",
+    "exercise": "Übung",
+    "planned": "Geplant",
+    "exhibited": "Gezeigt",
+    "outcome": "Ergebnis",
+    "score": "Punkte",
+    "notes":"Notizen"
   },
   "exercises": {
     "choose_exercise": "-- Übung wählen --",

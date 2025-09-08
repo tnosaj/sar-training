@@ -38,7 +38,21 @@
     "create_title": "Create Dog",
     "empty": "No dogs yet.",
     "list_title": "All Dogs",
-    "name": "Name"
+    "name": "Name",
+    "view_stats": "stats",
+    "stats_title": "Dog stats",
+    "total_rounds": "Total rounds",
+    "success_rate": "Success rate",
+    "avg_score": "Avg. score",
+    "recent_rounds": "Recent rounds",
+    "no_rounds": "No rounds yet.",
+    "round_num": "#",
+    "exercise": "Exercise",
+    "planned": "Planned",
+    "exhibited": "Exhibited",
+    "outcome": "Outcome",
+    "score": "Score",
+    "notes": "Notes"
   },
   "exercises": {
     "choose_exercise": "-- choose exercise --",

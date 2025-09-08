@@ -56,6 +56,8 @@ func NewRouter(
 		r.Post("/", dogs.Create)
 		r.Put("/{id}", dogs.Update)
 		r.Delete("/{id}", dogs.Delete)
+		// rounds across sessions for a dog
+		r.Get("/{id}/rounds", sessions.ListRoundsByDog)
 	})
 
 	r.Route("/sessions", func(r chi.Router) {
