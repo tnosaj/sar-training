@@ -70,8 +70,7 @@ export default function DogsPage() {
       </Section>
       <div className="md:col-span-2">
         <Section title={t('dogs.list_title')} actions={<Button variant="secondary" onClick={list.reload}>{t('common.refresh')}</Button>}>
-          <DogStatsPanel dog={selectedDog} open={statsOpen} onClose={() => setStatsOpen(false)} />
-          <CardList items={list.items} empty={t('dogs.empty') as string}>
+          <CardList items={list.items} empty={t('dogs.empty') as string} onItemClick={(d:any) => { setSelectedDog(d); setStatsOpen(true) }}>
             {(d:any) => (
               <div>
                 {editingId === d.id ? (
@@ -87,7 +86,7 @@ export default function DogsPage() {
                 ) : (
                   <>
                     <div className="font-semibold">{d.name} {d.callname ? `(${d.callname})` : ''}
-                    <Button variant="secondary" onClick={() => { setSelectedDog(d); setStatsOpen(true) }} >{t('dogs.view_stats')}</Button>
+                    
                     </div>
                     {d.birthdate && <div className="text-sm text-gray-600">Born: {d.birthdate}</div>}
                     <div className="text-xs text-gray-400">id: {d.id}</div>
@@ -101,6 +100,7 @@ export default function DogsPage() {
 
             )}
           </CardList>
+          <DogStatsPanel dog={selectedDog} open={statsOpen} onClose={() => setStatsOpen(false)} />
         </Section>
       </div>
     </div>
