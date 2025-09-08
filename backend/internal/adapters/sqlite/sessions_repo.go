@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/tnosaj/sar-training/backend/internal/domain/common"
 	"github.com/tnosaj/sar-training/backend/internal/domain/session"
 	logx "github.com/tnosaj/sar-training/backend/internal/infra/log"
 )
@@ -23,6 +24,32 @@ func (r *SessionsRepo) CreateSession(ctx context.Context, s *session.Session) er
 	}
 	id, _ := res.LastInsertId()
 	s.ID = session.SessionID(id)
+	return nil
+}
+
+func (r *SessionsRepo) UpdateSession(ctx context.Context, s *session.Session) error {
+	res, err := r.db.ExecContext(ctx, `UPDATE sessions SET started_at=?, ended_at=?, location=?, notes=? WHERE id=?`,
+		s.StartedAt, s.EndedAt, s.Location, s.Notes, s.ID)
+	if err != nil {
+		return err
+	}
+	rows, _ := res.RowsAffected()
+	if rows == 0 {
+		return common.ErrNotFound
+	}
+	return nil
+}
+
+func (r *SessionsRepo) CloseSession(ctx context.Context, s *session.Session) error {
+	res, err := r.db.ExecContext(ctx, `UPDATE sessions SET ended_at=? WHERE id=?`,
+		s.EndedAt, s.ID)
+	if err != nil {
+		return err
+	}
+	rows, _ := res.RowsAffected()
+	if rows == 0 {
+		return common.ErrNotFound
+	}
 	return nil
 }
 
@@ -107,7 +134,6 @@ func (r *SessionsRepo) ListRounds(ctx context.Context, sessionID int64) ([]*sess
 	return out, rows.Err()
 }
 
-
 func (r *SessionsRepo) ListRoundsByDog(ctx context.Context, dogID int64) ([]*session.Round, error) {
 	rows, err := r.db.QueryContext(ctx, `SELECT id, session_id, round_number, dog_id, exercise_id, planned_behavior_id, exhibited_behavior_id, outcome, score, notes, started_at, ended_at, exhibited_free_text FROM rounds WHERE dog_id=? ORDER BY session_id ASC, round_number ASC`, dogID)
 	if err != nil {
@@ -126,12 +152,26 @@ func (r *SessionsRepo) ListRoundsByDog(ctx context.Context, dogID int64) ([]*ses
 		if err := rows.Scan(&ro.ID, &ro.SessionID, &ro.RoundNumber, &ro.DogID, &ro.ExerciseID, &ro.PlannedBehaviorID, &exhibited, &ro.Outcome, &score, &notes, &sstart, &send, &free); err != nil {
 			return nil, err
 		}
-		if exhibited.Valid { v := exhibited.Int64; ro.ExhibitedBehaviorID = &v }
-		if score.Valid { v := int(score.Int64); ro.Score = &v }
-		if notes.Valid { ro.Notes = &notes.String }
-		if sstart.Valid { ro.StartedAt = &sstart.String }
-		if send.Valid { ro.EndedAt = &send.String }
-		if free.Valid { ro.ExhibitedFreeText = &free.String }
+		if exhibited.Valid {
+			v := exhibited.Int64
+			ro.ExhibitedBehaviorID = &v
+		}
+		if score.Valid {
+			v := int(score.Int64)
+			ro.Score = &v
+		}
+		if notes.Valid {
+			ro.Notes = &notes.String
+		}
+		if sstart.Valid {
+			ro.StartedAt = &sstart.String
+		}
+		if send.Valid {
+			ro.EndedAt = &send.String
+		}
+		if free.Valid {
+			ro.ExhibitedFreeText = &free.String
+		}
 		out = append(out, &ro)
 	}
 	if err := rows.Err(); err != nil {

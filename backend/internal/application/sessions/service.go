@@ -32,6 +32,36 @@ func (s *Service) Create(ctx context.Context, cmd CreateSessionCommand) (*dto.Se
 	return toSessionDTO(ent), nil
 }
 
+func (s *Service) Update(ctx context.Context, cmd UpdateSessionCommand) (*dto.Session, error) {
+	logx.Std.Tracef("update session %v", cmd)
+	started := cmd.StartedAt
+	if started == nil {
+		v := time.Now().UTC().Format(time.RFC3339)
+		started = &v
+	}
+	ent := &session.Session{ID: session.SessionID(cmd.SessionID), StartedAt: *started, EndedAt: cmd.EndedAt, Location: cmd.Location, Notes: cmd.Notes}
+	if err := s.repo.UpdateSession(ctx, ent); err != nil {
+		logx.Std.Errorf("update session failed: %s", err)
+		return nil, err
+	}
+	return toSessionDTO(ent), nil
+}
+
+func (s *Service) Close(ctx context.Context, cmd CloseSessionCommand) (*dto.Session, error) {
+	logx.Std.Tracef("update session %v", cmd)
+	ended := cmd.EndedAt
+	if ended == nil {
+		v := time.Now().UTC().Format(time.RFC3339)
+		ended = &v
+	}
+	ent := &session.Session{EndedAt: ended, ID: session.SessionID(cmd.SessionID)}
+	if err := s.repo.CloseSession(ctx, ent); err != nil {
+		logx.Std.Errorf("close session failed: %s", err)
+		return nil, err
+	}
+	return toSessionDTO(ent), nil
+}
+
 func (s *Service) List(ctx context.Context) ([]*dto.Session, error) {
 	logx.Std.Trace("list session")
 	items, err := s.repo.ListSessions(ctx)

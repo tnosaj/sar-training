@@ -41,6 +41,34 @@ func (h *SessionsHandler) Create(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 201, res)
 }
 
+func (h *SessionsHandler) Update(w http.ResponseWriter, r *http.Request) {
+	var cmd sessions.UpdateSessionCommand
+	if err := json.NewDecoder(r.Body).Decode(&cmd); err != nil {
+		writeError(w, 400, "invalid json")
+		return
+	}
+	res, err := h.svc.Update(r.Context(), cmd)
+	if err != nil {
+		writeError(w, 500, err.Error())
+		return
+	}
+	writeJSON(w, 201, res)
+}
+
+func (h *SessionsHandler) Close(w http.ResponseWriter, r *http.Request) {
+	var cmd sessions.CloseSessionCommand
+	if err := json.NewDecoder(r.Body).Decode(&cmd); err != nil {
+		writeError(w, 400, "invalid json")
+		return
+	}
+	res, err := h.svc.Close(r.Context(), cmd)
+	if err != nil {
+		writeError(w, 500, err.Error())
+		return
+	}
+	writeJSON(w, 201, res)
+}
+
 func (h *SessionsHandler) ListDogs(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	items, err := h.svc.ListDogs(r.Context(), id)
@@ -99,7 +127,6 @@ func (h *SessionsHandler) CreateRound(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, 201, res)
 }
-
 
 // GET /dogs/{id}/rounds
 func (h *SessionsHandler) ListRoundsByDog(w http.ResponseWriter, r *http.Request) {
