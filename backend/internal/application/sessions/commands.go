@@ -7,9 +7,16 @@ type CreateSessionCommand struct {
 }
 
 type UpdateSessionCommand struct {
+	SessionID int64   `json:"-"`
 	Location  *string `json:"location,omitempty"`
 	Notes     *string `json:"notes,omitempty"`
 	StartedAt *string `json:"started_at,omitempty"`
+	EndedAt   *string `json:"ended_at,omitempty"`
+}
+
+type CloseSessionCommand struct {
+	SessionID int64   `json:"-"`
+	EndedAt   *string `json:"ended_at,omitempty"`
 }
 
 type AddDogCommand struct {

@@ -63,6 +63,8 @@ func NewRouter(
 	r.Route("/sessions", func(r chi.Router) {
 		r.Get("/", sessions.List)
 		r.Post("/", sessions.Create)
+		r.Put("/{id}", sessions.Update)
+		r.Patch("/{id}", sessions.Close)
 		r.Get("/{id}/dogs", sessions.ListDogs)
 		r.Post("/{id}/dogs", sessions.AddDog)
 		r.Get("/{id}/rounds", sessions.ListRounds)

@@ -26,16 +26,16 @@ type Exercise struct {
 }
 
 type Dog struct {
-	ID       int64   `json:"id"`
-	Name     string  `json:"name"`
-	Callname *string `json:"callname,omitempty"`
+	ID        int64   `json:"id"`
+	Name      string  `json:"name"`
+	Callname  *string `json:"callname,omitempty"`
 	Birthdate *string `json:"birthdate,omitempty"`
 }
 
 type Session struct {
 	ID        int64   `json:"id"`
 	StartedAt string  `json:"started_at"`
-	EndedAt   *string `json:"ended_at,omitempty"`
+	EndedAt   *string `json:"ended_at"`
 	Location  *string `json:"location,omitempty"`
 	Notes     *string `json:"notes,omitempty"`
 }

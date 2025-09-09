@@ -123,7 +123,9 @@
     "location_optional": "Ort (optional)",
     "notes_optional": "Notizen (optional)",
     "placeholder_location": "Trainingsplatz",
-    "placeholder_notes": "Abendarbeit"
+    "placeholder_notes": "Abendarbeit",
+    "close": "Abschliesen",
+    "reopen": "Aufsperren"
    },
    "settings": {
      "api_base": "API-Basis",
