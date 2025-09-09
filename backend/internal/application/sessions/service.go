@@ -48,7 +48,7 @@ func (s *Service) Update(ctx context.Context, cmd UpdateSessionCommand) (*dto.Se
 }
 
 func (s *Service) Close(ctx context.Context, cmd CloseSessionCommand) (*dto.Session, error) {
-	logx.Std.Tracef("update session %v", cmd)
+	logx.Std.Tracef("close/open session %v", cmd)
 	ended := cmd.EndedAt
 	if ended == nil {
 		v := time.Now().UTC().Format(time.RFC3339)

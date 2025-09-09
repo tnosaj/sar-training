@@ -16,13 +16,14 @@ function saveQueue(sessionId:number, items:QItem[]) {
 }
 
 export default function PlanOrganize({
-  session, dogs, behaviors, exercises, onSaved,
+  session, dogs, behaviors, exercises, onSaved, isClosed
 }:{
   session:any
   dogs:any[]
   behaviors:any[]
   exercises:any[]
   onSaved: () => void
+  isClosed:boolean
 }) {
   const { t } = useTranslation()
   
@@ -39,6 +40,7 @@ export default function PlanOrganize({
   const canAdd = dogId && exerciseId
 
   const add = () => {
+    if (isClosed) return alert('Session is closed — cannot add dogs.')
     if (!canAdd) return
     const item: QItem = {
       dog_id: Number(dogId),
@@ -85,8 +87,9 @@ export default function PlanOrganize({
 
   return (
     <div className="space-y-4">
-      <div className="text-sm text-gray-600">Plan — Session #{session.id}</div>
-
+      <div className="text-sm text-gray-600">Plan — Session #{session.id} ({session.started_at}
+  {isClosed && <> → {session.ended_at} <span className="inline-flex items-center text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200">Closed</span></>})</div>
+     
       <div className="grid md:grid-cols-3 gap-4">
         <Select label="Dog" value={dogId} onChange={e => setDogId(e.target.value)}>
           <option value="">Choose...</option>
@@ -104,8 +107,8 @@ export default function PlanOrganize({
 
       <div className="flex gap-2">
         <Button variant="secondary" onClick={add} disabled={!canAdd}>Add to Queue</Button>
-        <Button onClick={save} disabled={!queue.length}>Save</Button>
-        <Button variant="danger" onClick={clear} disabled={!queue.length}>Clear</Button>
+        <Button onClick={save} disabled={!queue.length || isClosed}>Save</Button>
+        <Button variant="danger" onClick={clear} disabled={!queue.length || isClosed}>Clear</Button>
       </div>
 
       <div className="space-y-3">

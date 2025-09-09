@@ -123,7 +123,9 @@
     "location_optional": "Location (optional)",
     "notes_optional": "Notes (optional)",
     "placeholder_location": "Training field",
-    "placeholder_notes": "Evening work"
+    "placeholder_notes": "Evening work",
+    "close": "Close",
+    "reopen": "Reopen"
    },
    "settings": {
      "api_base": "API Base",

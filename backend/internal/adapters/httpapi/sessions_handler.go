@@ -42,11 +42,13 @@ func (h *SessionsHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SessionsHandler) Update(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	var cmd sessions.UpdateSessionCommand
 	if err := json.NewDecoder(r.Body).Decode(&cmd); err != nil {
 		writeError(w, 400, "invalid json")
 		return
 	}
+	cmd.SessionID = id
 	res, err := h.svc.Update(r.Context(), cmd)
 	if err != nil {
 		writeError(w, 500, err.Error())
@@ -56,11 +58,13 @@ func (h *SessionsHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SessionsHandler) Close(w http.ResponseWriter, r *http.Request) {
+	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	var cmd sessions.CloseSessionCommand
 	if err := json.NewDecoder(r.Body).Decode(&cmd); err != nil {
 		writeError(w, 400, "invalid json")
 		return
 	}
+	cmd.SessionID = id
 	res, err := h.svc.Close(r.Context(), cmd)
 	if err != nil {
 		writeError(w, 500, err.Error())
