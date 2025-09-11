@@ -1,4 +1,4 @@
-package usersgo
+package users
 
 type CreateUserCommand struct {
 	Email        string `json:"email"`
