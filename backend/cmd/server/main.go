@@ -13,6 +13,7 @@ import (
 	"github.com/tnosaj/sar-training/backend/internal/application/exercises"
 	"github.com/tnosaj/sar-training/backend/internal/application/sessions"
 	"github.com/tnosaj/sar-training/backend/internal/application/skills"
+	"github.com/tnosaj/sar-training/backend/internal/application/users"
 	"github.com/tnosaj/sar-training/backend/internal/infra/config"
 	logx "github.com/tnosaj/sar-training/backend/internal/infra/log"
 )
@@ -42,6 +43,7 @@ func main() {
 	exRepo := sqlite.NewExercisesRepo(db.DB)
 	dgRepo := sqlite.NewDogsRepo(db.DB)
 	snRepo := sqlite.NewSessionsRepo(db.DB)
+	usrRepo := sqlite.NewUsersRepo(db.DB)
 
 	// services
 	skSvc := skills.NewService(skRepo)
@@ -49,6 +51,7 @@ func main() {
 	exSvc := exercises.NewService(exRepo)
 	dgSvc := dogs.NewService(dgRepo)
 	snSvc := sessions.NewService(snRepo)
+	usrSvs := users.NewService(usrRepo)
 
 	// handlers
 	skH := httpapi.NewSkillsHandler(skSvc)
@@ -56,8 +59,9 @@ func main() {
 	exH := httpapi.NewExercisesHandler(exSvc)
 	dgH := httpapi.NewDogsHandler(dgSvc)
 	snH := httpapi.NewSessionsHandler(snSvc)
+	usH := httpapi.NewUsersHandler(usrSvs, []byte(cfg.Secret))
 
-	r := httpapi.NewRouter(health(db), skH, bhH, exH, dgH, snH)
+	r := httpapi.NewRouter(health(db), skH, bhH, exH, dgH, snH, usH)
 
 	addr := ":" + cfg.Port
 	logx.Std.Infof("listening on %s", addr)

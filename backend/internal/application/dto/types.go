@@ -55,3 +55,11 @@ type Round struct {
 	StartedAt           *string `json:"started_at,omitempty"`
 	EndedAt             *string `json:"ended_at,omitempty"`
 }
+
+type User struct {
+	ID           int64  `json:"id"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"-"`
+	IsAdmin      bool   `json:"is_admin"`
+	CreatedAt    string `json:"created_at"`
+}

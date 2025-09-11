@@ -53,6 +53,9 @@ function pushOutbox(item: OutboxItem) { setOutbox([...getOutbox(), item]) }
 let watcherStarted = false
 let watcherTimer: number | undefined
 
+let onUnauthorized: null | (() => void) = null;
+export function setUnauthorizedHandler(fn: () => void) { onUnauthorized = fn; }
+
 export function startNetworkWatcher(apiBase: string) {
   // Debounce restarts
   if (watcherStarted && watcherTimer) { clearInterval(watcherTimer) }
@@ -107,10 +110,12 @@ export async function apiFetch(path: string, opts: RequestInit = {}) {
   const apiBase = localStorage.getItem(LS_KEY) || '/api'
   const method = (opts.method || 'GET').toString().toUpperCase()
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) }
-
+  const res = await fetch(`${apiBase}${path}`, { headers, credentials:'include', ...opts,  })
+   // 401 → notify auth layer, then throw
+  if (res.status === 401) { onUnauthorized?.(); throw new Error('unauthorized') }
   if (method === 'GET') {
-    try {
-      const res = await fetch(`${apiBase}${path}`, { ...opts, headers })
+    try {  
+      
       const text = await res.text()
       let data: any
       try { data = text ? JSON.parse(text) : undefined } catch { data = text }
@@ -133,7 +138,6 @@ export async function apiFetch(path: string, opts: RequestInit = {}) {
     }
     // Online path
     try {
-      const res = await fetch(`${apiBase}${path}`, { ...opts, headers })
       const text = await res.text()
       let data: any
       try { data = text ? JSON.parse(text) : undefined } catch { data = text }
