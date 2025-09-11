@@ -17,8 +17,8 @@ type UsersHandler struct {
 
 type unauthenticatedUser struct {
 	Email    string `json:"email"`
-	Password string `json:"-"`
-	IsAdmin  bool   `json:"is_admin"`
+	Password string `json:"password"`
+	IsAdmin  bool   `json:"isAdmin,omitempty"`
 }
 
 func NewUsersHandler(u *users.Service, secret []byte) *UsersHandler {
@@ -52,6 +52,7 @@ func (a *UsersHandler) handleRegister(w http.ResponseWriter, r *http.Request) {
 func (a *UsersHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var in unauthenticatedUser
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		logx.Std.Errorf("error decoding initial body: %s", err)
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -62,7 +63,8 @@ func (a *UsersHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil || checkPassword(u.PasswordHash, in.Password) != nil {
-		http.Error(w, `{"error":"invalid credentials"}`, 401)
+		logx.Std.Errorf("error checking password: %s", err)
+		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 	tok, _ := a.signToken(u.ID, 7*24*time.Hour) // 7 days
@@ -75,23 +77,19 @@ func (a *UsersHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *UsersHandler) handleMe(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, `{"error":"method not allowed"}`, 405)
-		return
-	}
 	c, err := r.Cookie(authCookieName)
 	if err != nil {
-		http.Error(w, `{"error":"unauthorized"}`, 401)
+		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 	uid, err := a.parseToken(c.Value)
 	if err != nil {
-		http.Error(w, `{"error":"unauthorized"}`, 401)
+		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 	u, err := a.svc.GetUserByID(r.Context(), users.GetUserByIDCommand{ID: uid})
 	if err != nil {
-		http.Error(w, `{"error":"unauthorized"}`, 401)
+		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 	json.NewEncoder(w).Encode(struct {
@@ -102,10 +100,6 @@ func (a *UsersHandler) handleMe(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *UsersHandler) handleLogout(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, `{"error":"method not allowed"}`, 405)
-		return
-	}
 	clearAuthCookie(w)
 	w.WriteHeader(http.StatusNoContent)
 }

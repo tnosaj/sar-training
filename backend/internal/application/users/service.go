@@ -47,7 +47,7 @@ func (s *Service) CreateUser(ctx context.Context, cmd CreateUserCommand) (*dto.U
 }
 
 func (s *Service) GetUserByEmail(ctx context.Context, cmd GetUserByEmailCommand) (*dto.User, error) {
-	logx.Std.Tracef("create user %v", cmd)
+	logx.Std.Tracef("get user by email %v", cmd)
 	if cmd.Email == "" {
 		return nil, common.ErrValidation
 	}
@@ -60,7 +60,7 @@ func (s *Service) GetUserByEmail(ctx context.Context, cmd GetUserByEmailCommand)
 }
 
 func (s *Service) GetUserByID(ctx context.Context, cmd GetUserByIDCommand) (*dto.User, error) {
-	logx.Std.Tracef("create user %v", cmd)
+	logx.Std.Tracef("get user by id %v", cmd)
 	// should do some check to make sure cmd.ID is not empty
 	user, err := s.repo.GetUserByID(ctx, cmd.ID)
 	if err != nil {

@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -9,6 +10,27 @@ import (
 )
 
 const authCookieName = "auth"
+
+type ctxKey int
+
+const userIDKey ctxKey = 1
+
+func (a *UsersHandler) authRequired(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c, err := r.Cookie(authCookieName)
+		if err != nil || c.Value == "" {
+			writeError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+		uid, err := a.parseToken(c.Value)
+		if err != nil {
+			writeError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+		ctx := context.WithValue(r.Context(), userIDKey, uid)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
 
 func (a *UsersHandler) signToken(userID int64, ttl time.Duration) (string, error) {
 	claims := jwt.MapClaims{

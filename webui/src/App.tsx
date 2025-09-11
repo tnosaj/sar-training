@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react'
+import { useAuth } from './auth/AuthContext'
+import LoginPage from './auth/LoginPage'
 import { getInitialApiBase, startNetworkWatcher, LS_KEY } from './lib/api'
 import Dashboard from './features/dashboard/Dashboard'
 import SkillsPage from './features/skills/SkillsPage'
@@ -10,6 +12,8 @@ import SettingsPage from './features/settings/SettingsPage'
 import { cx } from './lib/cx'
 import { Select } from './components/ui/Select'
 import OfflineBanner from './components/OfflineBanner'
+
+
 
 import { useTranslation } from 'react-i18next'
 
@@ -24,6 +28,8 @@ const TABS = [
 ] as const
 
 export default function App() {
+  const { user, loading } = useAuth()
+
   const [apiBase, setApiBase] = useState(getInitialApiBase())
   useEffect(() => {
     localStorage.setItem(LS_KEY, apiBase)
@@ -31,7 +37,10 @@ export default function App() {
   }, [apiBase])
   const [tab, setTab] = useState<(typeof TABS)[number]['key']>('dashboard')
   const { t, i18n } = useTranslation()
-   const currentLng = (i18n.resolvedLanguage || i18n.language || 'en').split('-')[0]
+  const currentLng = (i18n.resolvedLanguage || i18n.language || 'en').split('-')[0]
+  if (loading) return <div className="min-h-screen grid place-items-center">Loading…</div>
+  if (!user) return <LoginPage />
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">

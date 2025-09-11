@@ -7,6 +7,7 @@ services:
       - PORT=8080
       - DB_PATH=/data/dogtracker.db
       - LOG_LEVEL=trace
+      - AUTH_SECRET=superdev
     volumes:
       - dbdata:/data
     ports:

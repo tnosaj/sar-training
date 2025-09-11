@@ -107,10 +107,11 @@ export async function apiFetch(path: string, opts: RequestInit = {}) {
   const apiBase = localStorage.getItem(LS_KEY) || '/api'
   const method = (opts.method || 'GET').toString().toUpperCase()
   const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) }
-
+  
   if (method === 'GET') {
     try {
-      const res = await fetch(`${apiBase}${path}`, { ...opts, headers })
+      const res = await fetch(`${apiBase}${path}`, { headers, credentials:'include', ...opts,  })
+      if (res.status === 401) { throw new Error('unauthorized') }    
       const text = await res.text()
       let data: any
       try { data = text ? JSON.parse(text) : undefined } catch { data = text }
