@@ -13,6 +13,7 @@ func NewRouter(
 	exercises *ExercisesHandler,
 	dogs *DogsHandler,
 	sessions *SessionsHandler,
+	users *UsersHandler,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -30,28 +31,33 @@ func NewRouter(
 	})
 
 	r.Get("/health", health)
+	r.HandleFunc("/auth/register", users.handleRegister) // keep or remove after seeding
+	r.HandleFunc("/auth/login", users.handleLogin)
+	r.HandleFunc("/auth/logout", users.handleLogout)
+	r.HandleFunc("/auth/me", users.handleMe)
 
-	r.Route("/skills", func(r chi.Router) {
+	protected := chi.NewRouter()
+	protected.Route("/skills", func(r chi.Router) {
 		r.Get("/", skills.List)
 		r.Post("/", skills.Create)
 		r.Put("/{id}", skills.Update)
 		r.Delete("/{id}", skills.Delete)
 	})
 
-	r.Route("/behaviors", func(r chi.Router) {
+	protected.Route("/behaviors", func(r chi.Router) {
 		r.Get("/", behaviors.List)
 		r.Post("/", behaviors.Create)
 	})
 
-	r.Route("/exercises", func(r chi.Router) {
+	protected.Route("/exercises", func(r chi.Router) {
 		r.Get("/", exercises.List)
 		r.Post("/", exercises.Create)
 	})
-	r.Route("/behavior-exercises", func(r chi.Router) {
+	protected.Route("/behavior-exercises", func(r chi.Router) {
 		r.Post("/", exercises.LinkBehaviorExercise)
 	})
 
-	r.Route("/dogs", func(r chi.Router) {
+	protected.Route("/dogs", func(r chi.Router) {
 		r.Get("/", dogs.List)
 		r.Post("/", dogs.Create)
 		r.Put("/{id}", dogs.Update)
@@ -60,7 +66,7 @@ func NewRouter(
 		r.Get("/{id}/rounds", sessions.ListRoundsByDog)
 	})
 
-	r.Route("/sessions", func(r chi.Router) {
+	protected.Route("/sessions", func(r chi.Router) {
 		r.Get("/", sessions.List)
 		r.Post("/", sessions.Create)
 		r.Put("/{id}", sessions.Update)
@@ -71,5 +77,7 @@ func NewRouter(
 		r.Post("/{id}/rounds", sessions.CreateRound)
 	})
 
-	return r
+	root := chi.NewMux()
+	root.Handle("/", r)
+	return root
 }

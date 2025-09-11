@@ -1,11 +1,15 @@
 package config
 
-import "os"
+import (
+	"log"
+	"os"
+)
 
 type Config struct {
 	Port     string
 	DBPath   string
 	LogLevel string
+	Secret   string
 }
 
 func Load() Config {
@@ -21,5 +25,9 @@ func Load() Config {
 	if lglvl == "" {
 		lglvl = "warn"
 	}
-	return Config{Port: p, DBPath: db, LogLevel: lglvl}
+	secret := os.Getenv("AUTH_SECRET")
+	if secret == "" {
+		log.Fatal("AUTH_SECRET is required")
+	}
+	return Config{Port: p, DBPath: db, LogLevel: lglvl, Secret: secret}
 }
