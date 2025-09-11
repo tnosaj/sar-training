@@ -1,32 +1,64 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { apiFetch } from '../lib/api'
+import { apiFetch, setUnauthorizedHandler } from '../lib/api'
 
-type User = { id:number; email:string; is_admin:boolean } | null
-type Ctx = { user:User; loading:boolean; login:(email:string, password:string)=>Promise<void>; logout:()=>Promise<void> }
+type User = { id: number; email: string } | null
 
-const AuthCtx = createContext<Ctx>({ user:null, loading:true, login:async()=>{}, logout:async()=>{} })
-export const useAuth = () => useContext(AuthCtx)
+type AuthContextType = {
+  user: User
+  loading: boolean
+  login: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+}
 
-export function AuthProvider({ children }:{ children: React.ReactNode }) {
+const AuthCtx = createContext<AuthContextType | undefined>(undefined)
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User>(null)
   const [loading, setLoading] = useState(true)
 
-  const refresh = async () => {
-    try { const me = await apiFetch('/auth/me'); setUser(me) }
-    catch { setUser(null) }
-    finally { setLoading(false) }
+  // When any API call hits 401, auto “log out” in the UI
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      setUser(null)
+    })
+    // initial /me check
+    ;(async () => {
+      try {
+        const me = await apiFetch('/auth/me')       // <— adjust if your backend path differs
+        setUser(me)
+      } catch (e) {
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
+    })()
+  }, [])
+
+  const login = async (email: string, password: string) => {
+    // NOTE: assumes cookie-based session, not token; backend should set Set-Cookie
+    await apiFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    })
+    // re-fetch /me
+    const me = await apiFetch('/auth/me')
+    setUser(me)
   }
 
-  useEffect(() => { refresh() }, [])
-
-  const login = async (email:string, password:string) => {
-    await apiFetch('/auth/login', { method:'POST', body: JSON.stringify({ email, password }) })
-    await refresh()
-  }
   const logout = async () => {
-    await apiFetch('/auth/logout', { method:'POST' })
+    try { await apiFetch('/auth/logout', { method: 'POST' }) } catch { /* ignore */ }
     setUser(null)
   }
 
-  return <AuthCtx.Provider value={{ user, loading, login, logout }}>{children}</AuthCtx.Provider>
+  return (
+    <AuthCtx.Provider value={{ user, loading, login, logout }}>
+      {children}
+    </AuthCtx.Provider>
+  )
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthCtx)
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  return ctx
 }

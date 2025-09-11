@@ -29,7 +29,7 @@ const TABS = [
 
 export default function App() {
   const { user, loading } = useAuth()
-
+  const { logout } = useAuth()
   const [apiBase, setApiBase] = useState(getInitialApiBase())
   useEffect(() => {
     localStorage.setItem(LS_KEY, apiBase)
@@ -56,6 +56,7 @@ export default function App() {
                 </button>
               ))}
             </nav>
+            <button onClick={logout} className="text-sm px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200">Logout</button>
             <div className="hidden md:block w-36">
               <Select
                 label={t('nav.language')}
